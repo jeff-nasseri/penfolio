@@ -1,0 +1,30 @@
+# GitVersion configuration
+#
+# Strategy: GitHub Flow — all PRs merge directly to master.
+# No develop / release / feature branches needed.
+#
+# Version format:
+#   Docker image (assemblySemVer): MAJOR.MINOR.PATCH.0   e.g. 0.7.0.0
+#   Git tag        (semVer):       MAJOR.MINOR.PATCH       e.g. 0.7.0
+#
+# Bump rules (conventional commits):
+#   feat:                               → Minor bump  0.x.0
+#   fix | chore | refactor | perf | …  → Patch bump  0.0.x
+#   docs: | doc: | documentation:      → No bump
+#   untyped message                    → Patch bump  (fallback via branch increment)
+#   +semver: breaking  (footer)        → Major bump  (EMERGENCY — major frozen at 0)
+mode: ContinuousDelivery
+next-version: 0.7.0
+# Parse every commit on HEAD→version-source; the highest matching rule wins.
+commit-message-incrementing: Enabled
+major-version-bump-message: '^\+semver:\s*(breaking|major)'
+minor-version-bump-message: '^feat(\(.+\))?!?:'
+patch-version-bump-message: '^(fix|chore|refactor|perf|style|ci|test|build|revert)(\(.+\))?!?:'
+no-bump-message: '^(docs?|documentation)(\(.+\))?!?:'
+branches:
+  master:
+    regex: ^master$
+    mode: ContinuousDelivery
+    label: ''
+    increment: Patch
+    is-release-branch: true

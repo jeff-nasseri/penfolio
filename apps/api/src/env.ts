@@ -14,6 +14,8 @@ export const env = {
   jwtExpiresIn: str('JWT_EXPIRES_IN', '7d'),
   defaultUsername: str('DEFAULT_USERNAME', 'admin'),
   defaultPassword: str('DEFAULT_PASSWORD', 'admin123'),
+  /** build version (GitVersion assemblySemVer), injected at image build time. */
+  version: str('APP_VERSION', '0.0.0-dev'),
   /** directory holding the built Angular app (production static serving). */
   webDir: str('WEB_DIR', path.resolve(process.cwd(), 'public')),
 };

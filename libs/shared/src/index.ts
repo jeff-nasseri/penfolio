@@ -13,19 +13,27 @@
 /** Bump whenever the export file shape changes. */
 export const EXPORT_VERSION = 1;
 
-export const ABOUT = {
+export interface AboutInfo {
+  name: string;
+  tagline: string;
+  description: string;
+  /** filled at runtime from the build (GitVersion assemblySemVer). */
+  version: string;
+  repository: string;
+  license: string;
+}
+
+export const ABOUT: AboutInfo = {
   name: 'PenFolio',
   tagline: 'A self-hosted CV / cover-letter builder with a built-in job tracker.',
   description:
     'PenFolio is a self-hosted, open-source platform inspired by FlowCV. Build and ' +
     'tailor résumés and cover letters, then track every job application from saved to ' +
     'signed — all on your own machine, with no limits and no paywalls.',
-  version: '1.0.0',
+  version: '0.0.0',
   repository: 'https://github.com/jeff-nasseri/penfolio',
   license: 'MIT',
-} as const;
-
-export type AboutInfo = typeof ABOUT;
+};
 
 /** Short random id for client-generated nested objects (sections, entries…). */
 export function genId(prefix = ''): string {
@@ -165,6 +173,8 @@ export interface ResumeSection {
   /** the heading shown on the résumé (user-editable). */
   name: string;
   visible: boolean;
+  /** Icon name shown next to the heading (matches the UI Icon set). Empty = none. */
+  icon?: string;
   entries: ResumeEntry[];
   /** which layout column the section lives in for two-column templates. */
   column?: 1 | 2;
@@ -183,21 +193,52 @@ export interface AccentTargets {
   headingLine: boolean;
   headerIcons: boolean;
   dates: boolean;
+  /** colour the link icons / links. */
   links: boolean;
+  /** colour the skill dots / language bars / level bubbles. */
+  dotsBarsBubbles: boolean;
+  /** colour the entry subtitle (company / institution). */
+  entrySubtitle: boolean;
 }
+
+export type PhotoShape = 'circle' | 'squircle' | 'rounded' | 'soft' | 'square';
+export type PhotoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 export interface PhotoSettings {
   show: boolean;
-  shape: 'circle' | 'rounded' | 'square';
-  size: 'sm' | 'md' | 'lg';
+  shape: PhotoShape;
+  size: PhotoSize;
+  /** placement of the photo relative to the header text (top-header layouts). */
+  position: 'left' | 'top' | 'right';
   grayscale: boolean;
 }
 
+/** Link rendering options (mirrors FlowCV "Link Styling"). */
+export interface LinkStyle {
+  underline: boolean;
+  /** use the accent colour for link text. */
+  coloured: boolean;
+  showIcon: boolean;
+  iconStyle: 'chain' | 'external';
+}
+
+/** Footer toggles (mirrors FlowCV "Footer"). */
+export interface FooterSettings {
+  pageNumbers: boolean;
+  email: boolean;
+  name: boolean;
+}
+
+/** How the header contact details are arranged. */
+export type DetailsLayout = 'stack' | 'inline' | 'grid';
+
 export interface ResumeCustomization {
-  /** visual template id — see TEMPLATE_IDS. */
+  /** visual template id — see TEMPLATES. */
   template: string;
   accentColor: string;
   fontFamily: string;
+  /** name font, or 'inherit' to use the body font. */
+  nameFont: string;
   /** base scale multiplier, 0.85–1.2. */
   fontScale: number;
   /** line height multiplier, 1.1–1.8. */
@@ -206,9 +247,15 @@ export interface ResumeCustomization {
   sectionSpacing: number;
   headerPosition: 'top' | 'left' | 'right';
   headerAlignment: 'left' | 'center';
+  /** arrangement of the contact details in the header. */
+  headerDetailsLayout: DetailsLayout;
   columns: 1 | 2;
+  /** render section headings in UPPERCASE. */
+  headingUppercase: boolean;
   photo: PhotoSettings;
   accent: AccentTargets;
+  link: LinkStyle;
+  footer: FooterSettings;
   pageFormat: PageFormat;
   /** date display format token. */
   dateFormat: string;

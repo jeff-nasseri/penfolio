@@ -25,10 +25,14 @@ RUN npm --prefix apps/web run build
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
 
+# Version baked in at build time (GitVersion assemblySemVer); surfaced in the
+# app's Settings → About and at GET /api/settings/about.
+ARG APP_VERSION=0.0.0-dev
 ENV NODE_ENV=production \
     PORT=3000 \
     DATABASE_PATH=/app/data/penfolio.sqlite \
-    WEB_DIR=/app/public
+    WEB_DIR=/app/public \
+    APP_VERSION=${APP_VERSION}
 
 # API bundle + runtime node_modules (better-sqlite3 native binary).
 COPY --from=builder /app/apps/api/dist ./dist

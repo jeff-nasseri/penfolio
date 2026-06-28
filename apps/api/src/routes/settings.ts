@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { ABOUT, EXPORT_VERSION, type DatabaseExport, type ImportResult } from '@penfolio/shared';
+import { env } from '../env';
 import { getDb } from '../db/connection';
 import { DATA_TABLES, EXPORT_TABLES, IMPORT_TABLES } from '../db/migrate';
 import { requireAuth } from '../auth/middleware';
@@ -25,7 +26,7 @@ export function settingsRouter(): Router {
   router.get(
     '/about',
     asyncHandler((_req, res) => {
-      res.json(ABOUT);
+      res.json({ ...ABOUT, version: env.version });
     }),
   );
 
