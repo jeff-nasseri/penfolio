@@ -37,3 +37,11 @@ design/
 
 # Test artifacts
 coverage/
+
+# .NET (e2e)
+bin/
+obj/
+[Tt]est[Rr]esults/
+*.user
+# Reqnroll-generated feature code-behind
+*.feature.cs

@@ -85,6 +85,22 @@ npm run typecheck            # typecheck the API
 npm start                    # run the built API (serves the built UI too)
 ```
 
+## End-to-end tests
+
+The `e2e/` project is a behaviour-driven acceptance suite written with **Reqnroll**
+(Gherkin) and **Testcontainers**. When the tests run, Testcontainers builds the
+PenFolio image from the `Dockerfile` and starts a throwaway container, then the
+scenarios drive the real REST API of that live instance. The feature files read
+like a business analyst wrote them, and cover authentication, the job tracker,
+résumés, cover letters, analytics and settings.
+
+You need the .NET SDK and a running Docker engine.
+
+```bash
+cd e2e
+dotnet test
+```
+
 ## The API and Swagger
 
 Everything in the UI goes through a REST API. The interactive docs live at:

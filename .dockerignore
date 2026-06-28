@@ -4,7 +4,10 @@
 **/out-tsc
 design
 data
+e2e
+**/*.sqlite
 *.sqlite
+**/*.log
 *.log
 .git
 .github
