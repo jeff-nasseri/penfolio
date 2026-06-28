@@ -7,11 +7,13 @@ import { Icon } from '../../shared/icon';
 import { Logo } from '../../shared/logo';
 import { Toasts } from '../../shared/toast';
 import { Confirm } from '../../shared/confirm';
+import { TPipe } from '../../shared/t.pipe';
+import { LangSwitch } from '../../shared/lang-switch';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, Logo, Toasts, Confirm],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, Logo, Toasts, Confirm, TPipe, LangSwitch],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })

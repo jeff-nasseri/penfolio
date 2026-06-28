@@ -1,8 +1,8 @@
 <section class="page">
   <header class="head">
     <div>
-      <h1 class="pf-h1">Analytics</h1>
-      <p class="pf-sub">How your search is really going — measured across the whole pipeline.</p>
+      <h1 class="pf-h1">{{ 'analytics.title' | t }}</h1>
+      <p class="pf-sub">{{ 'analytics.subtitle' | t }}</p>
     </div>
   </header>
 
@@ -27,15 +27,15 @@
     <div class="docs">
       <a class="doc" routerLink="/resumes">
         <span class="doc-ic"><app-icon name="resume" [size]="18" /></span>
-        <div><div class="doc-n mono">{{ d.totals.resumes }}</div><div class="doc-l">Résumés</div></div>
+        <div><div class="doc-n mono">{{ d.totals.resumes }}</div><div class="doc-l">{{ 'analytics.resumes' | t }}</div></div>
       </a>
       <a class="doc" routerLink="/cover-letters">
         <span class="doc-ic"><app-icon name="cover" [size]="18" /></span>
-        <div><div class="doc-n mono">{{ d.totals.coverLetters }}</div><div class="doc-l">Cover letters</div></div>
+        <div><div class="doc-n mono">{{ d.totals.coverLetters }}</div><div class="doc-l">{{ 'analytics.coverLetters' | t }}</div></div>
       </a>
       <a class="doc" routerLink="/tracker">
         <span class="doc-ic"><app-icon name="tracker" [size]="18" /></span>
-        <div><div class="doc-n mono">{{ d.totals.columns }}</div><div class="doc-l">Tracker columns</div></div>
+        <div><div class="doc-n mono">{{ d.totals.columns }}</div><div class="doc-l">{{ 'analytics.columns' | t }}</div></div>
       </a>
     </div>
 

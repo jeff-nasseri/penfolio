@@ -5,13 +5,14 @@ import { AuthService } from '../../core/auth.service';
 import { ApiService } from '../../core/api.service';
 import { Icon } from '../../shared/icon';
 import { Logo } from '../../shared/logo';
+import { TPipe } from '../../shared/t.pipe';
 import { ToastService } from '../../shared/toast';
 import { ConfirmService } from '../../shared/confirm';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [FormsModule, Icon, Logo],
+  imports: [FormsModule, Icon, Logo, TPipe],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })

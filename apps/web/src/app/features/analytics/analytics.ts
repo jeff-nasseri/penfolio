@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import type { AnalyticsResponse } from '@penfolio/shared';
 import { ApiService } from '../../core/api.service';
 import { Icon } from '../../shared/icon';
+import { TPipe } from '../../shared/t.pipe';
 
 interface DonutSeg {
   color: string;
@@ -13,7 +14,7 @@ interface DonutSeg {
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [RouterLink, Icon],
+  imports: [RouterLink, Icon, TPipe],
   templateUrl: './analytics.html',
   styleUrl: './analytics.scss',
 })

@@ -1,21 +1,21 @@
 <section class="page">
   <header class="head">
     <div>
-      <h1 class="pf-h1">Job Tracker</h1>
-      <p class="pf-sub">Every application, from saved to signed — in one board.</p>
+      <h1 class="pf-h1">{{ 'tracker.title' | t }}</h1>
+      <p class="pf-sub">{{ 'tracker.subtitle' | t }}</p>
     </div>
     <div class="actions">
       <div class="search">
         <app-icon name="search" [size]="15" />
-        <input [value]="q()" (input)="q.set($any($event.target).value)" placeholder="Search company or role…" />
+        <input [value]="q()" (input)="q.set($any($event.target).value)" [placeholder]="'tracker.search' | t" />
       </div>
-      <button class="pf-btn pf-btn-ghost" (click)="openNewColumn()"><app-icon name="plus" [size]="15" /> Column</button>
-      <a class="pf-btn pf-btn-primary" routerLink="/analytics"><app-icon name="analytics" [size]="15" /> Analytics</a>
+      <button class="pf-btn pf-btn-ghost" (click)="openNewColumn()"><app-icon name="plus" [size]="15" /> {{ 'tracker.column' | t }}</button>
+      <a class="pf-btn pf-btn-primary" routerLink="/analytics"><app-icon name="analytics" [size]="15" /> {{ 'tracker.analytics' | t }}</a>
     </div>
   </header>
 
   @if (loading()) {
-    <div class="empty">Loading board…</div>
+    <div class="empty">{{ 'tracker.loading' | t }}</div>
   } @else {
     <div class="board-scroll">
       <div class="board" cdkDropListGroup>
@@ -31,7 +31,7 @@
             </div>
 
             <button class="add-card" (click)="openNewApp(col.id)">
-              <app-icon name="plus" [size]="14" /> Add application
+              <app-icon name="plus" [size]="14" /> {{ 'tracker.addApplication' | t }}
             </button>
 
             <div
@@ -61,7 +61,7 @@
                 </div>
               }
               @if (appsFor(col.id).length === 0) {
-                <div class="col-empty">Drop applications here</div>
+                <div class="col-empty">{{ 'tracker.dropHere' | t }}</div>
               }
             </div>
           </div>

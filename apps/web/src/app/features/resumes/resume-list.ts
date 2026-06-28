@@ -6,6 +6,7 @@ import { ApiService } from '../../core/api.service';
 import { Icon } from '../../shared/icon';
 import { ToastService } from '../../shared/toast';
 import { ConfirmService } from '../../shared/confirm';
+import { TPipe } from '../../shared/t.pipe';
 import {
   TEMPLATES,
   type TemplateCategory,
@@ -18,7 +19,7 @@ const CATEGORIES: ('All' | TemplateCategory)[] = ['All', 'Popular', 'Simple', 'M
 @Component({
   selector: 'app-resume-list',
   standalone: true,
-  imports: [FormsModule, Icon],
+  imports: [FormsModule, Icon, TPipe],
   templateUrl: './resume-list.html',
   styleUrl: './resume-list.scss',
 })

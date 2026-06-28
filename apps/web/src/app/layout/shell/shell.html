@@ -4,42 +4,44 @@
       <app-logo [size]="38" />
     </a>
 
-    <div class="nav-label">Workspace</div>
+    <div class="nav-label">{{ 'nav.workspace' | t }}</div>
     <nav class="nav">
       <a routerLink="/tracker" routerLinkActive="active" class="nav-item">
         <app-icon name="tracker" />
-        <span class="flex">Job Tracker</span>
+        <span class="flex">{{ 'nav.tracker' | t }}</span>
         @if (appCount() > 0) {
           <span class="badge mono">{{ appCount() }}</span>
         }
       </a>
       <a routerLink="/analytics" routerLinkActive="active" class="nav-item">
         <app-icon name="analytics" />
-        <span class="flex">Analytics</span>
+        <span class="flex">{{ 'nav.analytics' | t }}</span>
       </a>
       <a routerLink="/resumes" routerLinkActive="active" class="nav-item">
         <app-icon name="resume" />
-        <span class="flex">Resumes</span>
+        <span class="flex">{{ 'nav.resumes' | t }}</span>
       </a>
       <a routerLink="/cover-letters" routerLinkActive="active" class="nav-item">
         <app-icon name="cover" />
-        <span class="flex">Cover Letters</span>
+        <span class="flex">{{ 'nav.coverLetters' | t }}</span>
       </a>
     </nav>
 
     <div class="spacer"></div>
 
     <div class="selfhosted">
-      <div class="title"><app-icon name="sparkle" [size]="14" /> Self-hosted</div>
-      <div class="desc">Open-source &amp; yours. No limits, no paywalls.</div>
+      <div class="title"><app-icon name="sparkle" [size]="14" /> {{ 'selfHosted.title' | t }}</div>
+      <div class="desc">{{ 'selfHosted.desc' | t }}</div>
     </div>
+
+    <app-lang-switch />
 
     <div class="theme-toggle">
       <button [class.on]="theme() === 'light'" (click)="setTheme('light')">
-        <app-icon name="sun" [size]="15" /> Light
+        <app-icon name="sun" [size]="15" /> {{ 'theme.light' | t }}
       </button>
       <button [class.on]="theme() === 'dark'" (click)="setTheme('dark')">
-        <app-icon name="moon" [size]="15" /> Dark
+        <app-icon name="moon" [size]="15" /> {{ 'theme.dark' | t }}
       </button>
     </div>
 
@@ -53,7 +55,7 @@
       </span>
       <span class="meta">
         <span class="name">{{ user()?.username || 'Account' }}</span>
-        <span class="sub">My account</span>
+        <span class="sub">{{ 'nav.account' | t }}</span>
       </span>
       <app-icon name="sort" [size]="15" />
     </a>

@@ -6,12 +6,13 @@ import { ApiService } from '../../core/api.service';
 import { Icon } from '../../shared/icon';
 import { ToastService } from '../../shared/toast';
 import { ConfirmService } from '../../shared/confirm';
+import { TPipe } from '../../shared/t.pipe';
 import { COVER_TEMPLATES, coverCustomizationFor, sampleCoverContent } from './cover-data';
 
 @Component({
   selector: 'app-cover-list',
   standalone: true,
-  imports: [FormsModule, Icon],
+  imports: [FormsModule, Icon, TPipe],
   templateUrl: './cover-list.html',
   styleUrl: './cover-list.scss',
 })

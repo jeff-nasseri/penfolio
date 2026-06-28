@@ -16,6 +16,7 @@ import { CountsService } from '../../core/counts.service';
 import { Icon } from '../../shared/icon';
 import { ToastService } from '../../shared/toast';
 import { ConfirmService } from '../../shared/confirm';
+import { TPipe } from '../../shared/t.pipe';
 
 const COLUMN_COLORS = ['#8AA0C2', '#8B7BFF', '#E8B45A', '#4ADE80', '#F08C8C', '#56C7D6', '#C58AF0', '#7C8493'];
 
@@ -26,7 +27,7 @@ interface AppForm extends Partial<JobApplication> {
 @Component({
   selector: 'app-tracker',
   standalone: true,
-  imports: [FormsModule, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, Icon],
+  imports: [FormsModule, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, Icon, TPipe],
   templateUrl: './tracker.html',
   styleUrl: './tracker.scss',
 })

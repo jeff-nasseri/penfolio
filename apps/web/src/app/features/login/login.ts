@@ -4,11 +4,13 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { Logo } from '../../shared/logo';
 import { Icon } from '../../shared/icon';
+import { TPipe } from '../../shared/t.pipe';
+import { LangSwitch } from '../../shared/lang-switch';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, Logo, Icon],
+  imports: [FormsModule, Logo, Icon, TPipe, LangSwitch],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

@@ -7,6 +7,7 @@
 [![CI](https://github.com/jeff-nasseri/penfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/jeff-nasseri/penfolio/actions/workflows/ci.yml)
 [![Docker](https://github.com/jeff-nasseri/penfolio/actions/workflows/docker.yml/badge.svg)](https://github.com/jeff-nasseri/penfolio/actions/workflows/docker.yml)
 [![Image](https://img.shields.io/badge/ghcr.io-jeff--nasseri%2Fpenfolio-2496ED?logo=docker&logoColor=white)](https://github.com/jeff-nasseri/penfolio/pkgs/container/penfolio)
+[![Version](https://img.shields.io/github/v/tag/jeff-nasseri/penfolio?label=version&color=8B7BFF)](https://github.com/jeff-nasseri/penfolio/tags)
 [![License: MIT](https://img.shields.io/badge/License-MIT-8B7BFF.svg)](LICENSE)
 
 </div>
@@ -22,6 +23,7 @@ Everything runs on your own machine. There are no accounts to sign up for, no pa
 - **Job tracker** as a kanban board. Create, rename and delete your own columns, drag applications between them, and keep notes, sources and dates per application.
 - **Analytics** that turns your tracker into a report: a conversion funnel, a pipeline breakdown, applications over time and where they came from, plus totals for your résumés and cover letters.
 - **Settings** to change your password, write an about note, edit your profile (username and picture), export everything to JSON, import a JSON backup (replaces everything), and a danger zone to purge all data. There is also an "Open Swagger API" button.
+- **Multi-language UI** in English, Dutch (Nederlands) and Persian (فارسی), with full right-to-left layout for Persian. Switch from the sidebar at any time.
 - **Dark and light mode**, and a clean REST API behind everything so a future MCP server can drive PenFolio.
 
 ## Run it self-hosted (Docker)
