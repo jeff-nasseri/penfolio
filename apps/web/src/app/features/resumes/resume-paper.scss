@@ -21,6 +21,10 @@
   a {
     text-decoration: none;
   }
+  a.underline,
+  .contact.underline a {
+    text-decoration: underline;
+  }
 
   p {
     margin: 0 0 5px;
@@ -46,7 +50,13 @@
   &.center {
     flex-direction: column;
     text-align: center;
-    border-bottom: 1px solid #e5e7eb;
+  }
+  &.photo-top {
+    flex-direction: column;
+    text-align: center;
+  }
+  &.photo-right {
+    flex-direction: row-reverse;
   }
   &.side {
     flex-direction: column;
@@ -68,19 +78,27 @@
     color: #6b7280;
     font-weight: 700;
     font-size: 24px;
-    border-radius: 8px;
 
-    &.circle {
-      border-radius: 50%;
-    }
-    &.rounded {
-      border-radius: 14px;
-    }
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+  }
+  .shape-circle {
+    border-radius: 50%;
+  }
+  .shape-squircle {
+    border-radius: 28%;
+  }
+  .shape-rounded {
+    border-radius: 16px;
+  }
+  .shape-soft {
+    border-radius: 8px;
+  }
+  .shape-square {
+    border-radius: 0;
   }
 
   .ident {
@@ -99,15 +117,24 @@
   }
 
   .contacts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 14px;
+    margin-top: 9px;
     font-size: 11px;
     color: #374151;
 
-    &.stack {
+    &.layout-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+    }
+    &.layout-stack {
+      display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 5px;
+    }
+    &.layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px 16px;
     }
   }
   .contact {
@@ -120,12 +147,11 @@
     line-height: 1;
   }
 }
-
-.header.center .contacts {
+.header.center .contacts.layout-inline,
+.header.photo-top .contacts.layout-inline {
   justify-content: center;
 }
 
-/* When the header is on top, the contacts sit under the name on their own row */
 .body,
 .main {
   margin-top: 2px;
@@ -161,16 +187,22 @@
 
 /* ---- Sections ---- */
 .sec-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-size: 13px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   margin-bottom: 9px;
   padding-bottom: 4px;
 
   &.line {
     border-bottom: 2px solid;
   }
+}
+.uppercase-headings .sec-head {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .entry {
@@ -252,4 +284,21 @@
   padding: 2px 9px;
   border: 1px solid;
   border-radius: 20px;
+  color: #374151;
+}
+
+/* ---- Footer ---- */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 10.5px;
+  color: #6b7280;
+
+  .pg {
+    font-variant-numeric: tabular-nums;
+  }
 }

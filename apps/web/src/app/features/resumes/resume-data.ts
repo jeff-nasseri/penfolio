@@ -71,21 +71,29 @@ export interface ResumeTemplate {
   category: TemplateCategory;
   /** small visual hints for the picker tile. */
   headerColor: string;
-  customization: Partial<ResumeCustomization>;
+  customization: Partial<Omit<ResumeCustomization, 'photo' | 'accent' | 'link' | 'footer'>> & {
+    photo?: Partial<ResumeCustomization['photo']>;
+    accent?: Partial<ResumeCustomization['accent']>;
+    link?: Partial<ResumeCustomization['link']>;
+    footer?: Partial<ResumeCustomization['footer']>;
+  };
 }
 
-function defaults(): ResumeCustomization {
+export function defaultCustomization(): ResumeCustomization {
   return {
     template: 'classic-clear',
     accentColor: '#2563B8',
     fontFamily: 'Inter',
+    nameFont: 'inherit',
     fontScale: 1,
     lineSpacing: 1.4,
     sectionSpacing: 18,
     headerPosition: 'top',
     headerAlignment: 'left',
+    headerDetailsLayout: 'inline',
     columns: 1,
-    photo: { show: false, shape: 'circle', size: 'md', grayscale: false },
+    headingUppercase: true,
+    photo: { show: false, shape: 'circle', size: 'md', position: 'left', grayscale: false },
     accent: {
       name: true,
       jobTitle: false,
@@ -94,11 +102,41 @@ function defaults(): ResumeCustomization {
       headerIcons: true,
       dates: false,
       links: true,
+      dotsBarsBubbles: true,
+      entrySubtitle: true,
     },
+    link: { underline: false, coloured: true, showIcon: true, iconStyle: 'external' },
+    footer: { pageNumbers: false, email: false, name: false },
     pageFormat: 'A4',
     dateFormat: 'MMM YYYY',
   };
 }
+
+/**
+ * Fill any fields missing from a stored customization (older résumés) with the
+ * current defaults, so the editor and preview never read undefined.
+ */
+export function normalizeCustomization(c: Partial<ResumeCustomization> | null | undefined): ResumeCustomization {
+  const d = defaultCustomization();
+  const cz = c ?? {};
+  return {
+    ...d,
+    ...cz,
+    photo: { ...d.photo, ...(cz.photo ?? {}) },
+    accent: { ...d.accent, ...(cz.accent ?? {}) },
+    link: { ...d.link, ...(cz.link ?? {}) },
+    footer: { ...d.footer, ...(cz.footer ?? {}) },
+  };
+}
+
+/** Icons offered in the per-section icon picker (must be valid Icon names). */
+export const SECTION_ICONS = [
+  'profile', 'briefcase', 'cap', 'badge', 'flame', 'puzzle', 'globe', 'people',
+  'heart', 'folder', 'book', 'book-open', 'trophy', 'building', 'pen', 'code',
+  'signature', 'star', 'sparkle', 'database', 'site', 'link',
+];
+
+const defaults = defaultCustomization;
 
 export const TEMPLATES: ResumeTemplate[] = [
   { id: 'classic-clear', name: 'Classic Clear', category: 'Popular', headerColor: '#2563B8', customization: { accentColor: '#2563B8', fontFamily: 'Inter', headerPosition: 'top', columns: 1 } },
@@ -122,6 +160,8 @@ export function customizationFor(templateId: string): ResumeCustomization {
     template: tpl.id,
     photo: { ...base.photo, ...(tpl.customization.photo ?? {}) },
     accent: { ...base.accent, ...(tpl.customization.accent ?? {}) },
+    link: { ...base.link, ...(tpl.customization.link ?? {}) },
+    footer: { ...base.footer, ...(tpl.customization.footer ?? {}) },
   };
 }
 

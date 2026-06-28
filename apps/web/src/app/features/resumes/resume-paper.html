@@ -2,6 +2,7 @@
   <div
     class="resume-paper pf-print"
     #paper
+    [class.uppercase-headings]="c.headingUppercase"
     [style.width.px]="pageW"
     [style.fontFamily]="fontStack"
     [style.lineHeight]="c.lineSpacing"
@@ -22,17 +23,28 @@
         <ng-container *ngTemplateOutlet="bodyTpl" />
       </div>
     }
+
+    @if (showFooter) {
+      <div class="footer" [style.borderColor]="c.accent.headingLine ? c.accentColor : '#e5e7eb'">
+        <span>{{ footerText }}</span>
+        @if (c.footer.pageNumbers) { <span class="pg">1</span> }
+      </div>
+    }
   </div>
 </div>
 
 <!-- Header block -->
 <ng-template #headerBlock let-side="side">
-  <header class="header" [class.center]="c.headerAlignment === 'center' && !side" [class.side]="side">
+  <header
+    class="header"
+    [class.center]="c.headerAlignment === 'center' && !side"
+    [class.side]="side"
+    [class.photo-top]="!side && c.photo.position === 'top'"
+    [class.photo-right]="!side && c.photo.position === 'right'"
+  >
     @if (c.photo.show) {
       <div
-        class="photo"
-        [class.circle]="c.photo.shape === 'circle'"
-        [class.rounded]="c.photo.shape === 'rounded'"
+        class="photo shape-{{ c.photo.shape }}"
         [style.width.px]="photoPx"
         [style.height.px]="photoPx"
         [style.filter]="c.photo.grayscale ? 'grayscale(1)' : 'none'"
@@ -45,7 +57,7 @@
       </div>
     }
     <div class="ident">
-      <div class="name" [style.color]="c.accent.name ? c.accentColor : '#111827'">
+      <div class="name" [style.fontFamily]="nameFontStack" [style.color]="c.accent.name ? c.accentColor : '#111827'">
         {{ content.personalDetails.fullName || 'Your Name' }}
       </div>
       @if (content.personalDetails.jobTitle) {
@@ -53,18 +65,20 @@
           {{ content.personalDetails.jobTitle }}
         </div>
       }
-    </div>
-    <div class="contacts" [class.stack]="side">
-      @for (ct of vmContacts; track ct.label) {
-        <span class="contact">
-          <span class="ci" [style.color]="c.accent.headerIcons ? c.accentColor : '#6b7280'">●</span>
-          @if (ct.url) {
-            <a [href]="ct.url" target="_blank" [style.color]="c.accent.links ? c.accentColor : '#374151'">{{ ct.text }}</a>
-          } @else {
-            <span>{{ ct.text }}</span>
-          }
-        </span>
-      }
+      <div class="contacts layout-{{ side ? 'stack' : c.headerDetailsLayout }}">
+        @for (ct of vmContacts; track ct.label) {
+          <span class="contact" [class.underline]="c.link.underline && ct.url">
+            @if (c.link.showIcon) {
+              <span class="ci" [style.color]="c.accent.headerIcons ? c.accentColor : '#6b7280'">●</span>
+            }
+            @if (ct.url) {
+              <a [href]="ct.url" target="_blank" [style.color]="c.link.coloured && c.accent.links ? c.accentColor : '#374151'">{{ ct.text }}</a>
+            } @else {
+              <span>{{ ct.text }}</span>
+            }
+          </span>
+        }
+      </div>
     </div>
   </header>
 </ng-template>
@@ -79,7 +93,10 @@
         [style.color]="c.accent.headings ? c.accentColor : '#111827'"
         [style.borderColor]="c.accent.headingLine ? c.accentColor : 'transparent'"
       >
-        {{ vs.s.name }}
+        @if (vs.s.icon) {
+          <app-icon [name]="vs.s.icon" [size]="15" />
+        }
+        <span>{{ vs.s.name }}</span>
       </div>
       @for (ve of vs.entries; track ve.e.id) {
         <div class="entry">
@@ -96,7 +113,7 @@
                 @if (ve.e.level > 0) {
                   <span class="dots">
                     @for (d of dots; track d) {
-                      <i [style.background]="d <= ve.e.level ? c.accentColor : '#d1d5db'"></i>
+                      <i [style.background]="d <= ve.e.level ? (c.accent.dotsBarsBubbles ? c.accentColor : '#374151') : '#d1d5db'"></i>
                     }
                   </span>
                 }
@@ -109,7 +126,7 @@
                 @if (ve.e.level > 0) {
                   <span class="dots">
                     @for (d of dots; track d) {
-                      <i [style.background]="d <= ve.e.level ? c.accentColor : '#d1d5db'"></i>
+                      <i [style.background]="d <= ve.e.level ? (c.accent.dotsBarsBubbles ? c.accentColor : '#374151') : '#d1d5db'"></i>
                     }
                   </span>
                 }
@@ -127,7 +144,7 @@
                 <div class="eh-left">
                   <span class="e-title">{{ ve.e.title }}</span>
                   @if (ve.e.subtitle) {
-                    <span class="e-sub" [style.color]="c.accentColor">{{ ve.e.subtitle }}</span>
+                    <span class="e-sub" [style.color]="c.accent.entrySubtitle ? c.accentColor : '#4b5563'">{{ ve.e.subtitle }}</span>
                   }
                 </div>
                 <div class="eh-right" [style.color]="c.accent.dates ? c.accentColor : '#6b7280'">
@@ -141,7 +158,7 @@
                 <div class="desc" [innerHTML]="ve.desc"></div>
               }
               @if (ve.e.url) {
-                <a class="e-url" [href]="ve.e.url" target="_blank" [style.color]="c.accentColor">{{ ve.e.url }}</a>
+                <a class="e-url" [class.underline]="c.link.underline" [href]="ve.e.url" target="_blank" [style.color]="c.link.coloured ? c.accentColor : '#374151'">{{ ve.e.url }}</a>
               }
             }
           }

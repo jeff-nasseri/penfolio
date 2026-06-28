@@ -1,12 +1,19 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { CoverLetterCustomization, CoverLetterDocument, ResumeDocument } from '@penfolio/shared';
 import { ApiService } from '../../core/api.service';
 import { Icon } from '../../shared/icon';
 import { ToastService } from '../../shared/toast';
+import { downloadElementAsPdf } from '../../shared/pdf';
 import { CoverPaper } from './cover-paper';
-import { COVER_ACCENTS, COVER_FONTS, COVER_TEMPLATES, coverCustomizationFor } from './cover-data';
+import {
+  COVER_ACCENTS,
+  COVER_FONTS,
+  COVER_TEMPLATES,
+  coverCustomizationFor,
+  normalizeCoverCustomization,
+} from './cover-data';
 
 type Tab = 'overview' | 'write' | 'customize';
 
@@ -23,18 +30,22 @@ export class CoverEditor implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
+  @ViewChild(CoverPaper) paperCmp?: CoverPaper;
+
   readonly doc = signal<CoverLetterDocument | null>(null);
   readonly rev = signal(0);
   readonly tab = signal<Tab>('write');
   readonly saveState = signal<'idle' | 'saving' | 'saved'>('idle');
+  readonly downloading = signal(false);
+  readonly fullscreen = signal(false);
   readonly resumes = signal<ResumeDocument[]>([]);
 
   readonly fonts = COVER_FONTS;
   readonly swatches = COVER_ACCENTS;
   readonly templates = COVER_TEMPLATES;
   readonly aligns: ('left' | 'center')[] = ['left', 'center'];
-  readonly photoShapes: ('circle' | 'rounded' | 'square')[] = ['circle', 'rounded', 'square'];
-  readonly photoSizes: ('sm' | 'md' | 'lg')[] = ['sm', 'md', 'lg'];
+  readonly photoShapes: ('circle' | 'squircle' | 'rounded' | 'soft' | 'square')[] = ['circle', 'squircle', 'rounded', 'soft', 'square'];
+  readonly photoSizes: ('xs' | 'sm' | 'md' | 'lg' | 'xl')[] = ['xs', 'sm', 'md', 'lg', 'xl'];
 
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
   private printAfterLoad = false;
@@ -45,8 +56,9 @@ export class CoverEditor implements OnInit, OnDestroy {
     this.api.listResumes().subscribe({ next: (r) => this.resumes.set(r) });
     this.api.getCoverLetter(id).subscribe({
       next: (d) => {
+        d.customization = normalizeCoverCustomization(d.customization);
         this.doc.set(d);
-        if (this.printAfterLoad) setTimeout(() => window.print(), 600);
+        if (this.printAfterLoad) setTimeout(() => this.download(), 700);
       },
       error: () => {
         this.toast.error('Cover letter not found');
@@ -71,8 +83,19 @@ export class CoverEditor implements OnInit, OnDestroy {
       .updateCoverLetter(d.id, { title: d.title, tag: d.tag, content: d.content, customization: d.customization })
       .subscribe({ next: () => this.saveState.set('saved'), error: () => this.toast.error('Save failed') });
   }
-  download(): void {
-    window.print();
+  async download(): Promise<void> {
+    const d = this.doc();
+    const el = this.paperCmp?.getElement();
+    if (!d || !el || this.downloading()) return;
+    this.downloading.set(true);
+    try {
+      const name = (d.title || 'cover-letter').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+      await downloadElementAsPdf(el, `${name}.pdf`, d.customization.pageFormat);
+    } catch {
+      this.toast.error('Could not generate the PDF');
+    } finally {
+      this.downloading.set(false);
+    }
   }
   back(): void {
     if (this.saveTimer) {

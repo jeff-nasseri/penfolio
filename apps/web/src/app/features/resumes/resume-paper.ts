@@ -18,9 +18,10 @@ import {
   type ResumeEntry,
   type ResumeSection,
 } from '@penfolio/shared';
+import { Icon } from '../../shared/icon';
 
 const PAGE_W: Record<string, number> = { A4: 794, Letter: 816 };
-const PHOTO_SIZE: Record<string, number> = { sm: 64, md: 92, lg: 120 };
+const PHOTO_SIZE: Record<string, number> = { xs: 52, sm: 70, md: 92, lg: 116, xl: 142 };
 
 interface VmEntry {
   e: ResumeEntry;
@@ -38,17 +39,10 @@ interface VmContact {
   url: string;
 }
 
-/**
- * Renders the résumé "paper". Inputs are mutated in place by the editor, so the
- * view-model is recomputed only when `rev` (a change counter bumped on every
- * edit) changes — NOT on every change-detection pass. Returning fresh arrays /
- * SafeHtml from template-bound getters would thrash `@for` and `[innerHTML]`
- * and peg the CPU, so all derived data is precomputed into stable fields here.
- */
 @Component({
   selector: 'app-resume-paper',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, Icon],
   templateUrl: './resume-paper.html',
   styleUrl: './resume-paper.scss',
 })
@@ -59,6 +53,8 @@ export class ResumePaper implements OnChanges, AfterViewInit, OnDestroy {
   @Input({ required: true }) content!: ResumeContent;
   @Input({ required: true }) customization!: ResumeCustomization;
   @Input() rev = 0;
+  /** when true the paper renders at natural size (no fit-to-width scaling). */
+  @Input() fullSize = false;
   @ViewChild('frame') frameRef?: ElementRef<HTMLElement>;
   @ViewChild('paper') paperRef?: ElementRef<HTMLElement>;
 
@@ -71,6 +67,7 @@ export class ResumePaper implements OnChanges, AfterViewInit, OnDestroy {
   private onResize = () => this.measure();
 
   private get scale(): number {
+    if (this.fullSize) return 1;
     return Math.min(1, this.availWidth / this.pageW);
   }
   private get frameHeight(): number {
@@ -91,10 +88,15 @@ export class ResumePaper implements OnChanges, AfterViewInit, OnDestroy {
   get isSide(): boolean {
     return this.c.headerPosition === 'left' || this.c.headerPosition === 'right';
   }
+  private stack(family: string): string {
+    const serif = family === 'Lora' || family === 'Georgia';
+    return `'${family}', ${serif ? 'Georgia, serif' : 'system-ui, sans-serif'}`;
+  }
   get fontStack(): string {
-    const f = this.c.fontFamily;
-    const serif = f === 'Lora' || f === 'Georgia';
-    return `'${f}', ${serif ? 'Georgia, serif' : 'system-ui, sans-serif'}`;
+    return this.stack(this.c.fontFamily);
+  }
+  get nameFontStack(): string {
+    return this.stack(this.c.nameFont && this.c.nameFont !== 'inherit' ? this.c.nameFont : this.c.fontFamily);
   }
   get accentTint(): string {
     return this.c.accentColor + '12';
@@ -107,11 +109,24 @@ export class ResumePaper implements OnChanges, AfterViewInit, OnDestroy {
       .join('')
       .toUpperCase();
   }
+  get footerText(): string {
+    const f = this.c.footer;
+    const parts: string[] = [];
+    if (f.name && this.content.personalDetails.fullName) parts.push(this.content.personalDetails.fullName);
+    if (f.email && this.content.personalDetails.email) parts.push(this.content.personalDetails.email);
+    return parts.join('  ·  ');
+  }
+  get showFooter(): boolean {
+    return !!this.footerText || this.c.footer.pageNumbers;
+  }
+
+  /** the paper DOM element, used by the PDF exporter. */
+  getElement(): HTMLElement | undefined {
+    return this.paperRef?.nativeElement;
+  }
 
   ngOnChanges(): void {
     this.rebuild();
-    // page format may have changed → re-apply scale imperatively (not via a
-    // binding, to avoid NG0100 from the async-measured width).
     this.applyStyles();
   }
 
@@ -199,8 +214,6 @@ export class ResumePaper implements OnChanges, AfterViewInit, OnDestroy {
     if (w) this.availWidth = w;
     this.applyStyles();
   }
-  /** Apply the scale + frame height directly to the DOM (no Angular bindings,
-   * so change detection never sees a mid-cycle value change). */
   private applyStyles(): void {
     const frame = this.frameRef?.nativeElement;
     const paper = this.paperRef?.nativeElement;

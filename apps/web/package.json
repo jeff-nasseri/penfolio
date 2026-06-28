@@ -11,7 +11,14 @@
   "prettier": {
     "printWidth": 100,
     "singleQuote": true,
-    "overrides": [{ "files": "*.html", "options": { "parser": "angular" } }]
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
   },
   "dependencies": {
     "@angular/animations": "^20.3.0",
@@ -22,6 +29,8 @@
     "@angular/forms": "^20.3.0",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

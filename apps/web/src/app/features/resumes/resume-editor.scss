@@ -210,10 +210,20 @@
     border-radius: 8px;
     background: var(--accent-soft);
     color: var(--accent);
+    border: none;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+
+    &.muted {
+      background: var(--chip-bg);
+      color: var(--text-muted);
+    }
+    &:hover {
+      filter: brightness(1.08);
+    }
   }
   .sec-name {
     flex: 1;
@@ -499,4 +509,184 @@
 
 select.pf-input {
   appearance: none;
+}
+
+/* Consistent vertical rhythm between the content cards / Add Content button */
+.content-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.add-content {
+  margin-top: 2px;
+}
+
+/* Section icon picker popover */
+.icon-picker {
+  margin: 0 14px 14px;
+  padding: 12px;
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  background: var(--panel-2);
+
+  .ip-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+  .ip-none {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+
+    &:hover {
+      color: var(--danger);
+    }
+  }
+  .ip-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .ip-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-2);
+    border-radius: 9px;
+    background: var(--bg);
+    color: var(--text-2);
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    &.sel {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+  }
+}
+
+/* Photo shape preview buttons */
+.seg.shapes {
+  gap: 6px;
+
+  .shape-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px;
+
+    &.on {
+      background: var(--elevate);
+    }
+  }
+  .shape-prev {
+    width: 20px;
+    height: 20px;
+    background: var(--text-3);
+    display: block;
+  }
+  .shape-circle {
+    border-radius: 50%;
+  }
+  .shape-squircle {
+    border-radius: 28%;
+  }
+  .shape-rounded {
+    border-radius: 6px;
+  }
+  .shape-soft {
+    border-radius: 3px;
+  }
+  .shape-square {
+    border-radius: 0;
+  }
+}
+
+/* Live preview — clickable + expand affordance */
+.preview {
+  position: sticky;
+  top: 90px;
+
+  .expand-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--border-2);
+    background: var(--topbar-bg);
+    backdrop-filter: blur(8px);
+    color: var(--text-2);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+
+    &:hover {
+      color: var(--text);
+    }
+  }
+  &:hover .expand-btn {
+    opacity: 1;
+  }
+  .preview-click {
+    cursor: zoom-in;
+  }
+}
+
+/* Fullscreen preview */
+.fs-backdrop {
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  background: rgba(6, 7, 10, 0.82);
+}
+.fs-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+
+  .fs-title {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .flex {
+    flex: 1;
+  }
+}
+.fs-paper {
+  flex: 1;
+  overflow: auto;
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }

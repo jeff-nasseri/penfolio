@@ -29,9 +29,18 @@ function defaults(): CoverLetterCustomization {
     lineSpacing: 1.5,
     headerPosition: 'top',
     headerAlignment: 'left',
-    photo: { show: false, shape: 'circle', size: 'md', grayscale: false },
+    photo: { show: false, shape: 'circle', size: 'md', position: 'left', grayscale: false },
     pageFormat: 'A4',
   };
+}
+
+/** Backfill missing fields on a stored cover-letter customization. */
+export function normalizeCoverCustomization(
+  c: Partial<CoverLetterCustomization> | null | undefined,
+): CoverLetterCustomization {
+  const d = defaults();
+  const cz = c ?? {};
+  return { ...d, ...cz, photo: { ...d.photo, ...(cz.photo ?? {}) } };
 }
 
 export const COVER_TEMPLATES: CoverTemplate[] = [

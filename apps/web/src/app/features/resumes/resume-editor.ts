@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
   genId,
+  type PhotoShape,
+  type PhotoSize,
   type ResumeContent,
   type ResumeCustomization,
   type ResumeDocument,
@@ -15,15 +17,18 @@ import { ApiService } from '../../core/api.service';
 import { Icon } from '../../shared/icon';
 import { ToastService } from '../../shared/toast';
 import { ConfirmService } from '../../shared/confirm';
+import { downloadElementAsPdf } from '../../shared/pdf';
 import { ResumePaper } from './resume-paper';
 import {
   ACCENT_SWATCHES,
   ADD_SECTION_ORDER,
   FONT_OPTIONS,
+  SECTION_ICONS,
   SECTION_META,
   TEMPLATES,
   customizationFor,
   makeEntry,
+  normalizeCustomization,
 } from './resume-data';
 
 type Tab = 'overview' | 'content' | 'customize';
@@ -42,17 +47,23 @@ export class ResumeEditor implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
 
+  @ViewChild(ResumePaper) paperCmp?: ResumePaper;
+
   readonly doc = signal<ResumeDocument | null>(null);
   readonly rev = signal(0);
   readonly tab = signal<Tab>('content');
   readonly open = signal<Set<string>>(new Set());
   readonly addOpen = signal(false);
+  readonly fullscreen = signal(false);
+  readonly iconPickerFor = signal<string | null>(null);
   readonly saveState = signal<'idle' | 'saving' | 'saved'>('idle');
 
   readonly fonts = FONT_OPTIONS;
+  readonly nameFonts = [{ label: 'Same as body font', value: 'inherit' }, ...FONT_OPTIONS];
   readonly swatches = ACCENT_SWATCHES;
   readonly templates = TEMPLATES;
   readonly sectionMeta = SECTION_META;
+  readonly sectionIcons = SECTION_ICONS;
   readonly addItems = ADD_SECTION_ORDER.map((t) => ({ type: t, ...SECTION_META[t] }));
 
   // Stable references for template @for loops (never inline array literals in a
@@ -60,16 +71,20 @@ export class ResumeEditor implements OnInit, OnDestroy {
   readonly levels = [1, 2, 3, 4, 5];
   readonly headerPositions: ('top' | 'left' | 'right')[] = ['top', 'left', 'right'];
   readonly headerAligns: ('left' | 'center')[] = ['left', 'center'];
-  readonly photoShapes: ('circle' | 'rounded' | 'square')[] = ['circle', 'rounded', 'square'];
-  readonly photoSizes: ('sm' | 'md' | 'lg')[] = ['sm', 'md', 'lg'];
+  readonly detailsLayouts: ('stack' | 'inline' | 'grid')[] = ['stack', 'inline', 'grid'];
+  readonly photoPositions: ('left' | 'top' | 'right')[] = ['left', 'top', 'right'];
+  readonly photoShapes: PhotoShape[] = ['circle', 'squircle', 'rounded', 'soft', 'square'];
+  readonly photoSizes: PhotoSize[] = ['xs', 'sm', 'md', 'lg', 'xl'];
   readonly accentKeys: [keyof ResumeCustomization['accent'], string][] = [
     ['name', 'Name'],
     ['jobTitle', 'Job title'],
     ['headings', 'Headings'],
-    ['headingLine', 'Heading line'],
+    ['headingLine', 'Headings line'],
     ['headerIcons', 'Header icons'],
     ['dates', 'Dates'],
-    ['links', 'Links'],
+    ['links', 'Link icons'],
+    ['dotsBarsBubbles', 'Dots/bars/bubbles'],
+    ['entrySubtitle', 'Entry subtitle'],
   ];
 
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -107,9 +122,10 @@ export class ResumeEditor implements OnInit, OnDestroy {
     this.printAfterLoad = this.route.snapshot.queryParamMap.get('print') === '1';
     this.api.getResume(id).subscribe({
       next: (d) => {
+        d.customization = normalizeCustomization(d.customization); // backfill new fields
         this.doc.set(d);
         if (d.content.sections.length) this.open.set(new Set([d.content.sections[0].id]));
-        if (this.printAfterLoad) setTimeout(() => window.print(), 600);
+        if (this.printAfterLoad) setTimeout(() => this.download(), 700);
       },
       error: () => {
         this.toast.error('Résumé not found');
@@ -139,9 +155,35 @@ export class ResumeEditor implements OnInit, OnDestroy {
       });
   }
 
-  download(): void {
-    window.print();
+  readonly downloading = signal(false);
+  async download(): Promise<void> {
+    const d = this.doc();
+    const el = this.paperCmp?.getElement();
+    if (!d || !el || this.downloading()) return;
+    this.downloading.set(true);
+    try {
+      const name = (d.title || 'resume').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+      await downloadElementAsPdf(el, `${name}.pdf`, d.customization.pageFormat);
+    } catch {
+      this.toast.error('Could not generate the PDF');
+    } finally {
+      this.downloading.set(false);
+    }
   }
+
+  // ---- Section icon picker ----
+  openIconPicker(sectionId: string): void {
+    this.iconPickerFor.set(this.iconPickerFor() === sectionId ? null : sectionId);
+  }
+  setSectionIcon(s: ResumeSection, icon: string): void {
+    s.icon = icon;
+    this.doc.set({ ...this.doc()! });
+    this.touch();
+  }
+  iconOf(s: ResumeSection): string {
+    return s.icon || this.sectionMeta[s.type].icon;
+  }
+
   back(): void {
     if (this.saveTimer) {
       clearTimeout(this.saveTimer);

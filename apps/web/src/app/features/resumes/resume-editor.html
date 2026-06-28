@@ -18,7 +18,9 @@
           }
         </span>
         <input class="title-input" [(ngModel)]="d.title" (input)="touch()" />
-        <button class="pf-btn pf-btn-solid" (click)="download()">Download <app-icon name="download" [size]="15" /></button>
+        <button class="pf-btn pf-btn-solid" (click)="download()" [disabled]="downloading()">
+          {{ downloading() ? 'Preparing…' : 'Download' }} <app-icon name="download" [size]="15" />
+        </button>
       </div>
     </div>
 
@@ -87,7 +89,9 @@
               <div class="pf-card section" cdkDrag>
                 <div class="sec-bar">
                   <span class="drag" cdkDragHandle><app-icon name="grip" [size]="16" /></span>
-                  <span class="sec-ic"><app-icon [name]="sectionMeta[s.type].icon" [size]="16" /></span>
+                  <button class="sec-ic" [class.muted]="!s.icon" (click)="openIconPicker(s.id)" title="Section icon">
+                    <app-icon [name]="iconOf(s)" [size]="16" />
+                  </button>
                   <input class="sec-name" [(ngModel)]="s.name" />
                   <button class="icon-btn" (click)="s.visible = !s.visible; touch()" [title]="s.visible ? 'Hide' : 'Show'">
                     <app-icon [name]="s.visible ? 'eye' : 'eye-off'" [size]="16" />
@@ -97,6 +101,22 @@
                     <app-icon name="chevron-down" [size]="16" [style.transform]="isOpen(s.id) ? 'rotate(180deg)' : ''" />
                   </button>
                 </div>
+
+                @if (iconPickerFor() === s.id) {
+                  <div class="icon-picker">
+                    <div class="ip-head">
+                      <span>Section icon</span>
+                      <button class="ip-none" (click)="setSectionIcon(s, ''); iconPickerFor.set(null)">No icon</button>
+                    </div>
+                    <div class="ip-grid">
+                      @for (ic of sectionIcons; track ic) {
+                        <button class="ip-cell" [class.sel]="s.icon === ic" (click)="setSectionIcon(s, ic); iconPickerFor.set(null)">
+                          <app-icon [name]="ic" [size]="17" />
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
 
                 @if (isOpen(s.id)) {
                   <div class="entries" cdkDropList (cdkDropListDropped)="dropEntry($event, s)">
@@ -212,11 +232,19 @@
           </div>
 
           <div class="pf-card block">
-            <div class="block-title">Typography</div>
-            <label class="pf-label">Font</label>
+            <div class="block-title">Font</div>
+            <label class="pf-label">Body font</label>
             <select class="pf-input" [ngModel]="d.customization.fontFamily" (ngModelChange)="set('fontFamily', $event)">
               @for (f of fonts; track f.value) { <option [value]="f.value">{{ f.label }}</option> }
             </select>
+            <label class="pf-label" style="margin-top:14px">Name font</label>
+            <select class="pf-input" [ngModel]="d.customization.nameFont" (ngModelChange)="set('nameFont', $event)">
+              @for (f of nameFonts; track f.value) { <option [value]="f.value">{{ f.label }}</option> }
+            </select>
+          </div>
+
+          <div class="pf-card block">
+            <div class="block-title">Font size &amp; spacing</div>
             <div class="slider">
               <label class="pf-label">Font size <b>{{ d.customization.fontScale.toFixed(2) }}×</b></label>
               <input type="range" min="0.85" max="1.2" step="0.01" [ngModel]="d.customization.fontScale" (ngModelChange)="set('fontScale', +$event)" />
@@ -232,6 +260,12 @@
           </div>
 
           <div class="pf-card block">
+            <div class="block-title">Headings</div>
+            <label class="check"><input type="checkbox" [checked]="d.customization.headingUppercase" (change)="d.customization.headingUppercase = !d.customization.headingUppercase; touch()" /> Uppercase headings</label>
+            <label class="check"><input type="checkbox" [checked]="d.customization.accent.headingLine" (change)="toggleAccent('headingLine')" /> Underline rule</label>
+          </div>
+
+          <div class="pf-card block">
             <div class="block-title">Layout</div>
             <label class="pf-label">Header position</label>
             <div class="seg">
@@ -243,6 +277,12 @@
             <div class="seg">
               @for (a of headerAligns; track a) {
                 <button [class.on]="d.customization.headerAlignment === a" (click)="set('headerAlignment', a)">{{ a }}</button>
+              }
+            </div>
+            <label class="pf-label" style="margin-top:14px">Details arrangement</label>
+            <div class="seg">
+              @for (l of detailsLayouts; track l) {
+                <button [class.on]="d.customization.headerDetailsLayout === l" (click)="set('headerDetailsLayout', l)">{{ l }}</button>
               }
             </div>
             <label class="pf-label" style="margin-top:14px">Body columns</label>
@@ -261,10 +301,10 @@
             <div class="block-title">Photo</div>
             <label class="check"><input type="checkbox" [checked]="d.customization.photo.show" (change)="d.customization.photo.show = !d.customization.photo.show; touch()" /> Show photo</label>
             <label class="check"><input type="checkbox" [checked]="d.customization.photo.grayscale" (change)="d.customization.photo.grayscale = !d.customization.photo.grayscale; touch()" /> Grayscale</label>
-            <label class="pf-label" style="margin-top:12px">Shape</label>
+            <label class="pf-label" style="margin-top:12px">Position</label>
             <div class="seg">
-              @for (sh of photoShapes; track sh) {
-                <button [class.on]="d.customization.photo.shape === sh" (click)="d.customization.photo.shape = sh; touch()">{{ sh }}</button>
+              @for (pp of photoPositions; track pp) {
+                <button [class.on]="d.customization.photo.position === pp" (click)="d.customization.photo.position = pp; touch()">{{ pp }}</button>
               }
             </div>
             <label class="pf-label" style="margin-top:12px">Size</label>
@@ -273,6 +313,34 @@
                 <button [class.on]="d.customization.photo.size === sz" (click)="d.customization.photo.size = sz; touch()">{{ sz }}</button>
               }
             </div>
+            <label class="pf-label" style="margin-top:12px">Shape</label>
+            <div class="seg shapes">
+              @for (sh of photoShapes; track sh) {
+                <button class="shape-btn" [class.on]="d.customization.photo.shape === sh" (click)="d.customization.photo.shape = sh; touch()" [title]="sh">
+                  <span class="shape-prev shape-{{ sh }}"></span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="pf-card block">
+            <div class="block-title">Links</div>
+            <label class="check"><input type="checkbox" [checked]="d.customization.link.underline" (change)="d.customization.link.underline = !d.customization.link.underline; touch()" /> Underline</label>
+            <label class="check"><input type="checkbox" [checked]="d.customization.link.coloured" (change)="d.customization.link.coloured = !d.customization.link.coloured; touch()" /> Use accent colour</label>
+            <label class="check"><input type="checkbox" [checked]="d.customization.link.showIcon" (change)="d.customization.link.showIcon = !d.customization.link.showIcon; touch()" /> Show link icon</label>
+            <label class="pf-label" style="margin-top:12px">Icon style</label>
+            <div class="seg">
+              <button [class.on]="d.customization.link.iconStyle === 'chain'" (click)="d.customization.link.iconStyle = 'chain'; touch()"><app-icon name="link" [size]="15" /></button>
+              <button [class.on]="d.customization.link.iconStyle === 'external'" (click)="d.customization.link.iconStyle = 'external'; touch()"><app-icon name="arrow-right" [size]="15" /></button>
+            </div>
+          </div>
+
+          <div class="pf-card block">
+            <div class="block-title">Footer</div>
+            <p class="muted">Shown at the bottom of the page.</p>
+            <label class="check"><input type="checkbox" [checked]="d.customization.footer.pageNumbers" (change)="d.customization.footer.pageNumbers = !d.customization.footer.pageNumbers; touch()" /> Page numbers</label>
+            <label class="check"><input type="checkbox" [checked]="d.customization.footer.email" (change)="d.customization.footer.email = !d.customization.footer.email; touch()" /> Email</label>
+            <label class="check"><input type="checkbox" [checked]="d.customization.footer.name" (change)="d.customization.footer.name = !d.customization.footer.name; touch()" /> Name</label>
           </div>
         }
 
@@ -300,10 +368,32 @@
 
       <!-- ============ RIGHT: live preview ============ -->
       <div class="preview">
-        <app-resume-paper [content]="d.content" [customization]="d.customization" [rev]="rev()" />
+        <button class="expand-btn" (click)="fullscreen.set(true)" title="Open full size">
+          <app-icon name="search" [size]="15" /> Open
+        </button>
+        <div class="preview-click" (click)="fullscreen.set(true)" title="Click to open full size">
+          <app-resume-paper [content]="d.content" [customization]="d.customization" [rev]="rev()" />
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- Fullscreen preview -->
+  @if (fullscreen()) {
+    <div class="pf-backdrop fs-backdrop" (click)="fullscreen.set(false)">
+      <div class="fs-bar" (click)="$event.stopPropagation()">
+        <span class="fs-title">{{ d.title }}</span>
+        <span class="flex"></span>
+        <button class="pf-btn pf-btn-solid" (click)="download()" [disabled]="downloading()">
+          {{ downloading() ? 'Preparing…' : 'Download' }} <app-icon name="download" [size]="15" />
+        </button>
+        <button class="icon-btn" (click)="fullscreen.set(false)"><app-icon name="close" [size]="18" /></button>
+      </div>
+      <div class="fs-paper" (click)="$event.stopPropagation()">
+        <app-resume-paper [content]="d.content" [customization]="d.customization" [rev]="rev()" [fullSize]="true" />
+      </div>
+    </div>
+  }
 
   <!-- Add content modal -->
   @if (addOpen()) {

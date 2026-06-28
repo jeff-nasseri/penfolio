@@ -12,7 +12,7 @@ import {
 import type { CoverLetterContent, CoverLetterCustomization } from '@penfolio/shared';
 
 const PAGE_W: Record<string, number> = { A4: 794, Letter: 816 };
-const PHOTO_SIZE: Record<string, number> = { sm: 56, md: 76, lg: 96 };
+const PHOTO_SIZE: Record<string, number> = { xs: 48, sm: 60, md: 76, lg: 92, xl: 112 };
 
 interface VmContact {
   label: string;
@@ -31,6 +31,7 @@ export class CoverPaper implements OnChanges, AfterViewInit, OnDestroy {
   @Input({ required: true }) content!: CoverLetterContent;
   @Input({ required: true }) customization!: CoverLetterCustomization;
   @Input() rev = 0;
+  @Input() fullSize = false;
   @ViewChild('frame') frameRef?: ElementRef<HTMLElement>;
   @ViewChild('paper') paperRef?: ElementRef<HTMLElement>;
 
@@ -41,6 +42,7 @@ export class CoverPaper implements OnChanges, AfterViewInit, OnDestroy {
   private onResize = () => this.measure();
 
   private get scale(): number {
+    if (this.fullSize) return 1;
     return Math.min(1, this.availWidth / this.pageW);
   }
   private get frameHeight(): number {
@@ -73,6 +75,10 @@ export class CoverPaper implements OnChanges, AfterViewInit, OnDestroy {
   }
   get displayDate(): string {
     return this.content.date || new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  getElement(): HTMLElement | undefined {
+    return this.paperRef?.nativeElement;
   }
 
   ngOnChanges(): void {
