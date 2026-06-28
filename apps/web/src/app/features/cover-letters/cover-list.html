@@ -1,0 +1,72 @@
+<section class="page">
+  <header class="head">
+    <div>
+      <h1 class="pf-h1">Cover Letters</h1>
+      <p class="pf-sub">Synced with your résumé — write once, reuse everywhere.</p>
+    </div>
+    <div class="actions">
+      <div class="search">
+        <app-icon name="search" [size]="15" />
+        <input [value]="q()" (input)="q.set($any($event.target).value)" placeholder="Search letters…" />
+      </div>
+      <button class="pf-btn pf-btn-primary" (click)="modalOpen.set(true)">
+        <app-icon name="plus" [size]="15" /> New cover letter
+      </button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state">Loading…</div>
+  } @else if (filtered().length === 0) {
+    <div class="state empty">
+      <app-icon name="cover" [size]="34" />
+      <p>No cover letters yet.</p>
+      <button class="pf-btn pf-btn-primary" (click)="modalOpen.set(true)"><app-icon name="plus" [size]="15" /> Write your first letter</button>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (l of filtered(); track l.id) {
+        <div class="card" (click)="open(l)">
+          <div class="card-head">
+            <span class="ic"><app-icon name="cover" [size]="19" /></span>
+            <div class="card-actions">
+              <button class="icon-btn" (click)="duplicate(l, $event)" title="Duplicate"><app-icon name="copy" [size]="15" /></button>
+              <button class="icon-btn danger" (click)="remove(l, $event)" title="Delete"><app-icon name="trash" [size]="15" /></button>
+            </div>
+          </div>
+          <div class="card-title">{{ l.title }}</div>
+          <div class="card-preview">{{ preview(l) }}</div>
+          <div class="card-foot"><app-icon name="clock" [size]="13" /> {{ ago(l.updatedAt) }}</div>
+        </div>
+      }
+    </div>
+  }
+</section>
+
+@if (modalOpen()) {
+  <div class="pf-backdrop" (click)="modalOpen.set(false)">
+    <div class="pf-modal picker" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h2>New cover letter</h2>
+          <p>Pick a style to start from — restyle it anytime.</p>
+        </div>
+        <button class="icon-btn" (click)="modalOpen.set(false)"><app-icon name="close" [size]="17" /></button>
+      </div>
+      <div class="tpl-grid">
+        @for (t of templates; track t.id) {
+          <div class="tile" (click)="create(t.id)">
+            <div class="mini">
+              <div class="mini-head" [style.background]="t.headerColor"></div>
+              <div class="mini-body">
+                <span class="ln w60" [style.background]="t.headerColor"></span>
+                <span class="ln w90"></span><span class="ln w95"></span><span class="ln w85"></span><span class="ln w70"></span>
+              </div>
+            </div>
+            <div class="tile-name">{{ t.name }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,70 @@
+<div class="frame" #frame>
+  <div
+    class="cover-paper pf-print"
+    #paper
+    [style.width.px]="pageW"
+    [style.fontFamily]="fontStack"
+    [style.lineHeight]="c.lineSpacing"
+    [style.fontSize.px]="13 * c.fontScale"
+  >
+    <header class="header" [class.center]="c.headerAlignment === 'center'">
+      @if (c.photo.show) {
+        <div
+          class="photo"
+          [class.circle]="c.photo.shape === 'circle'"
+          [class.rounded]="c.photo.shape === 'rounded'"
+          [style.width.px]="photoPx"
+          [style.height.px]="photoPx"
+          [style.filter]="c.photo.grayscale ? 'grayscale(1)' : 'none'"
+        >
+          @if (content.personalDetails.photo) {
+            <img [src]="content.personalDetails.photo" alt="" />
+          } @else {
+            <span>{{ initials }}</span>
+          }
+        </div>
+      }
+      <div class="ident">
+        <div class="name" [style.color]="c.accentColor">{{ content.personalDetails.fullName || 'Your Name' }}</div>
+        @if (content.personalDetails.jobTitle) {
+          <div class="title">{{ content.personalDetails.jobTitle }}</div>
+        }
+      </div>
+      <div class="contacts">
+        @for (ct of vmContacts; track ct.label) {
+          <span>{{ ct.text }}</span>
+        }
+      </div>
+    </header>
+
+    <div class="meta-row">
+      <div class="recipient">
+        @if (content.recipientName) { <div class="rec-name">{{ content.recipientName }}</div> }
+        @if (content.recipientCompany) { <div>{{ content.recipientCompany }}</div> }
+        @if (content.recipientAddress) { <div>{{ content.recipientAddress }}</div> }
+      </div>
+      <div class="date">{{ displayDate }}</div>
+    </div>
+
+    @if (content.subject) {
+      <div class="subject" [style.color]="c.accentColor">{{ content.subject }}</div>
+    }
+    @if (content.greeting) {
+      <p class="greeting">{{ content.greeting }}</p>
+    }
+
+    <div class="body">
+      @for (p of vmParagraphs; track $index) {
+        <p>{{ p }}</p>
+      }
+    </div>
+
+    <div class="closing">
+      <p>{{ content.closing || 'Kind regards,' }}</p>
+      <div class="sign" [style.color]="c.accentColor">{{ content.signature.fullName || content.personalDetails.fullName }}</div>
+      @if (content.signature.place) {
+        <div class="sign-meta">{{ content.signature.place }}</div>
+      }
+    </div>
+  </div>
+</div>

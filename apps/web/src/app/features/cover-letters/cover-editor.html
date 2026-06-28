@@ -1,0 +1,183 @@
+@if (doc(); as d) {
+  <section class="editor">
+    <div class="topbar">
+      <div class="left">
+        <button class="pf-btn pf-btn-ghost" (click)="back()"><app-icon name="chevron-left" [size]="15" /> Cover Letters</button>
+        <div class="tabs">
+          <button [class.on]="tab() === 'overview'" (click)="tab.set('overview')"><app-icon name="grid" [size]="15" /> Overview</button>
+          <button [class.on]="tab() === 'write'" (click)="tab.set('write')"><app-icon name="resume" [size]="15" /> Write</button>
+          <button [class.on]="tab() === 'customize'" (click)="tab.set('customize')"><app-icon name="palette" [size]="15" /> Customize</button>
+        </div>
+      </div>
+      <div class="right">
+        <span class="save-state">
+          @switch (saveState()) {
+            @case ('saving') { Saving… }
+            @case ('saved') { <app-icon name="check" [size]="14" /> Saved }
+          }
+        </span>
+        <input class="title-input" [(ngModel)]="d.title" (input)="touch()" />
+        <button class="pf-btn pf-btn-solid" (click)="download()">Download <app-icon name="download" [size]="15" /></button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="sync-banner" [class.on]="!!d.content.syncedResumeId">
+          <app-icon [name]="d.content.syncedResumeId ? 'check' : 'link'" [size]="15" />
+          @if (d.content.syncedResumeId) {
+            <span>Synced with “{{ syncedResumeTitle() }}” résumé</span>
+            <button class="link-btn" (click)="syncResume(null)">Unsync</button>
+          } @else {
+            <span>Not synced to a résumé.</span>
+            @if (resumes().length) {
+              <select class="mini-select" (change)="syncResume(+$any($event.target).value)">
+                <option value="0">Sync with résumé…</option>
+                @for (r of resumes(); track r.id) { <option [value]="r.id">{{ r.title }}</option> }
+              </select>
+            }
+          }
+        </div>
+
+        <!-- WRITE -->
+        @if (tab() === 'write') {
+          <div class="content-tab" (input)="touch()" (change)="touch()">
+            <div class="pf-card block">
+              <div class="block-head"><app-icon name="user" [size]="16" /> Sender details</div>
+              <div class="pd">
+                <div class="pd-photo">
+                  <div class="avatar">
+                    @if (d.content.personalDetails.photo) { <img [src]="d.content.personalDetails.photo" alt="" /> } @else { <app-icon name="camera" [size]="20" /> }
+                  </div>
+                  <label class="pf-btn pf-btn-ghost tiny">Upload<input type="file" accept="image/*" hidden (change)="onPhoto($event)" /></label>
+                </div>
+                <div class="grid2 pd-fields">
+                  <div><label class="pf-label">Full name</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.fullName" /></div>
+                  <div><label class="pf-label">Job title</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.jobTitle" /></div>
+                  <div><label class="pf-label">Email</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.email" /></div>
+                  <div><label class="pf-label">Phone</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.phone" /></div>
+                  <div class="full"><label class="pf-label">Location</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.location" /></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pf-card block">
+              <div class="block-head"><app-icon name="building" [size]="16" /> Recipient</div>
+              <div class="grid2">
+                <div><label class="pf-label">Name</label><input class="pf-input" [(ngModel)]="d.content.recipientName" placeholder="Hiring Team" /></div>
+                <div><label class="pf-label">Company</label><input class="pf-input" [(ngModel)]="d.content.recipientCompany" /></div>
+                <div><label class="pf-label">Address / City</label><input class="pf-input" [(ngModel)]="d.content.recipientAddress" /></div>
+                <div><label class="pf-label">Date</label><input class="pf-input" type="date" [(ngModel)]="d.content.date" /></div>
+              </div>
+            </div>
+
+            <div class="pf-card block">
+              <div class="block-head"><app-icon name="resume" [size]="16" /> Letter</div>
+              <label class="pf-label">Subject</label>
+              <input class="pf-input" [(ngModel)]="d.content.subject" />
+              <label class="pf-label" style="margin-top:14px">Greeting</label>
+              <input class="pf-input" [(ngModel)]="d.content.greeting" placeholder="Dear Hiring Team," />
+              <label class="pf-label" style="margin-top:14px">Body (blank line between paragraphs)</label>
+              <textarea class="pf-input body-area" rows="12" [(ngModel)]="d.content.body"></textarea>
+              <label class="pf-label" style="margin-top:14px">Closing</label>
+              <input class="pf-input" [(ngModel)]="d.content.closing" placeholder="Kind regards," />
+            </div>
+
+            <div class="pf-card block">
+              <div class="block-head"><app-icon name="signature" [size]="16" /> Signature</div>
+              <div class="grid2">
+                <div><label class="pf-label">Full name</label><input class="pf-input" [(ngModel)]="d.content.signature.fullName" /></div>
+                <div><label class="pf-label">Place</label><input class="pf-input" [(ngModel)]="d.content.signature.place" /></div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- CUSTOMIZE -->
+        @if (tab() === 'customize') {
+          <div class="pf-card block">
+            <div class="block-title">Template</div>
+            <div class="tpl-grid">
+              @for (t of templates; track t.id) {
+                <button class="tpl" [class.on]="d.customization.template === t.id" (click)="applyTemplate(t.id)">
+                  <span class="swatch" [style.background]="t.headerColor"></span>{{ t.name }}
+                </button>
+              }
+            </div>
+          </div>
+          <div class="pf-card block">
+            <div class="block-title">Colour</div>
+            <div class="swatches">
+              @for (c of swatches; track c) {
+                <button class="sw" [style.background]="c" [class.sel]="d.customization.accentColor === c" (click)="set('accentColor', c)">
+                  @if (d.customization.accentColor === c) { <app-icon name="check" [size]="13" /> }
+                </button>
+              }
+            </div>
+          </div>
+          <div class="pf-card block">
+            <div class="block-title">Typography</div>
+            <label class="pf-label">Font</label>
+            <select class="pf-input" [ngModel]="d.customization.fontFamily" (ngModelChange)="set('fontFamily', $event)">
+              @for (f of fonts; track f.value) { <option [value]="f.value">{{ f.label }}</option> }
+            </select>
+            <div class="slider">
+              <label class="pf-label">Font size <b>{{ d.customization.fontScale.toFixed(2) }}×</b></label>
+              <input type="range" min="0.85" max="1.2" step="0.01" [ngModel]="d.customization.fontScale" (ngModelChange)="set('fontScale', +$event)" />
+            </div>
+            <div class="slider">
+              <label class="pf-label">Line spacing <b>{{ d.customization.lineSpacing.toFixed(2) }}</b></label>
+              <input type="range" min="1.2" max="1.9" step="0.05" [ngModel]="d.customization.lineSpacing" (ngModelChange)="set('lineSpacing', +$event)" />
+            </div>
+          </div>
+          <div class="pf-card block">
+            <div class="block-title">Layout</div>
+            <label class="pf-label">Header alignment</label>
+            <div class="seg">
+              @for (a of aligns; track a) {
+                <button [class.on]="d.customization.headerAlignment === a" (click)="set('headerAlignment', a)">{{ a }}</button>
+              }
+            </div>
+            <label class="pf-label" style="margin-top:14px">Page format</label>
+            <div class="seg">
+              <button [class.on]="d.customization.pageFormat === 'A4'" (click)="set('pageFormat', 'A4')">A4</button>
+              <button [class.on]="d.customization.pageFormat === 'Letter'" (click)="set('pageFormat', 'Letter')">US Letter</button>
+            </div>
+          </div>
+          <div class="pf-card block">
+            <div class="block-title">Photo</div>
+            <label class="check"><input type="checkbox" [checked]="d.customization.photo.show" (change)="d.customization.photo.show = !d.customization.photo.show; touch()" /> Show photo</label>
+            <label class="pf-label" style="margin-top:12px">Shape</label>
+            <div class="seg">
+              @for (sh of photoShapes; track sh) {
+                <button [class.on]="d.customization.photo.shape === sh" (click)="d.customization.photo.shape = sh; touch()">{{ sh }}</button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- OVERVIEW -->
+        @if (tab() === 'overview') {
+          <div class="pf-card block">
+            <div class="block-title">Design ideas</div>
+            <p class="muted">Browse starting points to give your letter a confident, tailored opening, then jump into Write.</p>
+            <button class="pf-btn pf-btn-ghost" (click)="tab.set('write')">Start writing</button>
+          </div>
+          <div class="pf-card block">
+            <div class="block-title">Document</div>
+            <label class="pf-label">Title</label>
+            <input class="pf-input" [(ngModel)]="d.title" (input)="touch()" />
+            <label class="pf-label" style="margin-top:14px">Tag</label>
+            <input class="pf-input" [ngModel]="d.tag" (ngModelChange)="d.tag = $event; touch()" placeholder="e.g. .NET roles" />
+          </div>
+        }
+      </div>
+
+      <div class="preview">
+        <app-cover-paper [content]="d.content" [customization]="d.customization" [rev]="rev()" />
+      </div>
+    </div>
+  </section>
+} @else {
+  <div class="loading">Loading…</div>
+}
