@@ -1,0 +1,176 @@
+<section class="page">
+  <header class="head">
+    <div>
+      <h1 class="pf-h1">Job Tracker</h1>
+      <p class="pf-sub">Every application, from saved to signed — in one board.</p>
+    </div>
+    <div class="actions">
+      <div class="search">
+        <app-icon name="search" [size]="15" />
+        <input [value]="q()" (input)="q.set($any($event.target).value)" placeholder="Search company or role…" />
+      </div>
+      <button class="pf-btn pf-btn-ghost" (click)="openNewColumn()"><app-icon name="plus" [size]="15" /> Column</button>
+      <a class="pf-btn pf-btn-primary" routerLink="/analytics"><app-icon name="analytics" [size]="15" /> Analytics</a>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="empty">Loading board…</div>
+  } @else {
+    <div class="board-scroll">
+      <div class="board" cdkDropListGroup>
+        @for (col of columns(); track col.id) {
+          <div class="column">
+            <div class="col-head">
+              <span class="dot" [style.background]="col.color"></span>
+              <span class="col-name">{{ col.name }}</span>
+              <span class="col-count mono">{{ countFor(col.id) }}</span>
+              <span class="flex"></span>
+              <button class="icon-btn" (click)="openEditColumn(col)" title="Edit column"><app-icon name="edit" [size]="15" /></button>
+              <button class="icon-btn danger" (click)="deleteColumn(col)" title="Delete column"><app-icon name="trash" [size]="15" /></button>
+            </div>
+
+            <button class="add-card" (click)="openNewApp(col.id)">
+              <app-icon name="plus" [size]="14" /> Add application
+            </button>
+
+            <div
+              class="cards"
+              cdkDropList
+              [id]="'col-' + col.id"
+              [cdkDropListData]="appsFor(col.id)"
+              (cdkDropListDropped)="drop($event, col)"
+            >
+              @for (a of appsFor(col.id); track a.id) {
+                <div class="card" cdkDrag [cdkDragData]="a" (click)="openEditApp(a)">
+                  <div class="card-top">
+                    <span class="company">{{ a.company }}</span>
+                    <span class="pin" [style.background]="col.color"></span>
+                  </div>
+                  @if (a.role) {
+                    <div class="role">{{ a.role }}</div>
+                  }
+                  <div class="card-meta">
+                    @if (when(a)) {
+                      <span class="chip"><app-icon name="clock" [size]="11" /> {{ when(a) }}</span>
+                    }
+                    @if (a.source) {
+                      <span class="src">{{ a.source }}</span>
+                    }
+                  </div>
+                </div>
+              }
+              @if (appsFor(col.id).length === 0) {
+                <div class="col-empty">Drop applications here</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</section>
+
+<!-- ============ Application modal ============ -->
+@if (appModal(); as m) {
+  <div class="pf-backdrop" (click)="appModal.set(null)">
+    <div class="pf-modal app-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>{{ m.isNew ? 'Add application' : 'Edit application' }}</h2>
+        <button class="icon-btn" (click)="appModal.set(null)"><app-icon name="close" [size]="17" /></button>
+      </div>
+      <div class="grid2">
+        <div class="full">
+          <label class="pf-label">Company *</label>
+          <input class="pf-input" [(ngModel)]="m.form.company" placeholder="e.g. Booking.com" />
+        </div>
+        <div class="full">
+          <label class="pf-label">Role</label>
+          <input class="pf-input" [(ngModel)]="m.form.role" placeholder="e.g. Senior Backend Engineer" />
+        </div>
+        <div>
+          <label class="pf-label">Column</label>
+          <select class="pf-input" [(ngModel)]="m.form.columnId">
+            @for (c of columns(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="pf-label">Applied date</label>
+          <input class="pf-input" type="date" [(ngModel)]="m.form.appliedDate" />
+        </div>
+        <div>
+          <label class="pf-label">Source</label>
+          <input class="pf-input" [(ngModel)]="m.form.source" placeholder="LinkedIn, Referral…" />
+        </div>
+        <div>
+          <label class="pf-label">Location</label>
+          <input class="pf-input" [(ngModel)]="m.form.location" placeholder="Amsterdam / Remote" />
+        </div>
+        <div>
+          <label class="pf-label">Salary</label>
+          <input class="pf-input" [(ngModel)]="m.form.salary" placeholder="€70k" />
+        </div>
+        <div>
+          <label class="pf-label">Link</label>
+          <input class="pf-input" [(ngModel)]="m.form.url" placeholder="https://…" />
+        </div>
+        <div class="full">
+          <label class="pf-label">Notes</label>
+          <textarea class="pf-input" rows="3" [(ngModel)]="m.form.notes"></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        @if (!m.isNew) {
+          <button class="pf-btn pf-btn-danger" (click)="deleteApp($any(m.form))"><app-icon name="trash" [size]="15" /> Delete</button>
+        }
+        <span class="flex"></span>
+        <button class="pf-btn pf-btn-ghost" (click)="appModal.set(null)">Cancel</button>
+        <button class="pf-btn pf-btn-primary" (click)="saveApp()">{{ m.isNew ? 'Add' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ============ Column modal ============ -->
+@if (colModal(); as m) {
+  <div class="pf-backdrop" (click)="colModal.set(null)">
+    <div class="pf-modal col-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>{{ m.isNew ? 'New column' : 'Edit column' }}</h2>
+        <button class="icon-btn" (click)="colModal.set(null)"><app-icon name="close" [size]="17" /></button>
+      </div>
+      <label class="pf-label">Name</label>
+      <input class="pf-input" [(ngModel)]="m.form.name" placeholder="e.g. Waiting" />
+
+      <label class="pf-label" style="margin-top: 16px">Colour</label>
+      <div class="swatches">
+        @for (c of colors; track c) {
+          <button class="sw" [style.background]="c" [class.sel]="m.form.color === c" (click)="m.form.color = c">
+            @if (m.form.color === c) {
+              <app-icon name="check" [size]="13" />
+            }
+          </button>
+        }
+      </div>
+
+      <label class="pf-label" style="margin-top: 16px">Analytics stage</label>
+      <select class="pf-input" [(ngModel)]="m.form.stage">
+        @for (s of stages; track s.stage) {
+          <option [ngValue]="s.stage">{{ s.label }}</option>
+        }
+      </select>
+      <p class="hint">Stages power the funnel & rates on the Analytics page.</p>
+
+      <div class="modal-foot">
+        @if (!m.isNew) {
+          <button class="pf-btn pf-btn-danger" (click)="deleteColumn($any(m.form))"><app-icon name="trash" [size]="15" /> Delete</button>
+        }
+        <span class="flex"></span>
+        <button class="pf-btn pf-btn-ghost" (click)="colModal.set(null)">Cancel</button>
+        <button class="pf-btn pf-btn-primary" (click)="saveColumn()">{{ m.isNew ? 'Create' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+}
