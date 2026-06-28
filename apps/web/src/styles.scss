@@ -436,6 +436,11 @@ textarea::placeholder {
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
+    transform: none !important;
+  }
+  .frame {
+    overflow: visible !important;
+    height: auto !important;
   }
   @page {
     margin: 0;

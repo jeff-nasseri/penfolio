@@ -1,0 +1,112 @@
+<section class="page">
+  <header class="head">
+    <div>
+      <h1 class="pf-h1">My Resumes</h1>
+      <p class="pf-sub">Tailor a version for every role. They all stay in sync.</p>
+    </div>
+    <div class="actions">
+      <div class="search">
+        <app-icon name="search" [size]="15" />
+        <input [value]="q()" (input)="q.set($any($event.target).value)" placeholder="Search resumes…" />
+      </div>
+      <button class="pf-btn pf-btn-primary" (click)="modalOpen.set(true)">
+        <app-icon name="plus" [size]="15" /> Create resume
+      </button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state">Loading…</div>
+  } @else if (filtered().length === 0) {
+    <div class="state empty">
+      <app-icon name="resume" [size]="34" />
+      <p>No resumes yet.</p>
+      <button class="pf-btn pf-btn-primary" (click)="modalOpen.set(true)">
+        <app-icon name="plus" [size]="15" /> Create your first resume
+      </button>
+    </div>
+  } @else {
+    <div class="pf-card table">
+      <div class="row header-row">
+        <div>Title</div>
+        <div>Tag</div>
+        <div>Last modified</div>
+        <div>Format</div>
+        <div></div>
+      </div>
+      @for (r of filtered(); track r.id) {
+        <div class="row" (click)="open(r)">
+          <div class="title-cell">
+            <span class="thumb">
+              <i [style.background]="r.customization.accentColor || '#8B7BFF'"></i>
+              <i></i><i></i><i></i>
+            </span>
+            <div>
+              <div class="t">{{ r.title }}</div>
+              <div class="c">Created {{ dateLabel(r.createdAt) }}</div>
+            </div>
+          </div>
+          <div>
+            @if (r.tag) {
+              <span class="pf-tag">{{ r.tag }}</span>
+            } @else {
+              <span class="muted">—</span>
+            }
+          </div>
+          <div class="muted">{{ ago(r.updatedAt) }}</div>
+          <div class="muted">{{ r.customization.pageFormat || 'A4' }}</div>
+          <div class="row-actions">
+            <button class="icon-btn" (click)="duplicate(r, $event)" title="Duplicate"><app-icon name="copy" [size]="15" /></button>
+            <button class="icon-btn" (click)="download(r, $event)" title="Download"><app-icon name="download" [size]="15" /></button>
+            <button class="icon-btn danger" (click)="remove(r, $event)" title="Delete"><app-icon name="trash" [size]="15" /></button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>
+
+<!-- ===== Create resume modal (template picker) ===== -->
+@if (modalOpen()) {
+  <div class="pf-backdrop" (click)="modalOpen.set(false)">
+    <div class="pf-modal picker" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h2>Create new resume</h2>
+          <p>Pick a template to start from — you can restyle it anytime.</p>
+        </div>
+        <button class="icon-btn" (click)="modalOpen.set(false)"><app-icon name="close" [size]="17" /></button>
+      </div>
+
+      <div class="cats">
+        @for (cat of categories; track cat) {
+          <button class="cat" [class.on]="category() === cat" (click)="category.set(cat)">{{ cat }}</button>
+        }
+      </div>
+
+      <div class="grid">
+        <button class="tile blank" (click)="create('classic-clear')">
+          <app-icon name="plus" [size]="26" />
+          <span>New blank</span>
+        </button>
+        @for (t of templates(); track t.id) {
+          <div class="tile" (click)="create(t.id)">
+            <div class="mini">
+              <div class="mini-head" [style.background]="t.headerColor"></div>
+              <div class="mini-body">
+                <span class="ln w70" [style.background]="t.headerColor"></span>
+                <span class="ln w90"></span>
+                <span class="ln w80"></span>
+                <span class="ln w60"></span>
+                <span class="ln w85"></span>
+                <span class="ln w50"></span>
+              </div>
+              <div class="mini-hover">Use template <app-icon name="arrow-right" [size]="13" /></div>
+            </div>
+            <div class="tile-name">{{ t.name }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

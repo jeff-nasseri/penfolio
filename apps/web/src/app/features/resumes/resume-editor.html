@@ -1,0 +1,333 @@
+@if (doc(); as d) {
+  <section class="editor">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="left">
+        <button class="pf-btn pf-btn-ghost" (click)="back()"><app-icon name="chevron-left" [size]="15" /> Resumes</button>
+        <div class="tabs">
+          <button [class.on]="tab() === 'overview'" (click)="tab.set('overview')"><app-icon name="grid" [size]="15" /> Overview</button>
+          <button [class.on]="tab() === 'content'" (click)="tab.set('content')"><app-icon name="resume" [size]="15" /> Content</button>
+          <button [class.on]="tab() === 'customize'" (click)="tab.set('customize')"><app-icon name="palette" [size]="15" /> Customize</button>
+        </div>
+      </div>
+      <div class="right">
+        <span class="save-state">
+          @switch (saveState()) {
+            @case ('saving') { Saving… }
+            @case ('saved') { <app-icon name="check" [size]="14" /> Saved }
+          }
+        </span>
+        <input class="title-input" [(ngModel)]="d.title" (input)="touch()" />
+        <button class="pf-btn pf-btn-solid" (click)="download()">Download <app-icon name="download" [size]="15" /></button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- ============ LEFT PANEL ============ -->
+      <div class="panel">
+        <!-- ===== CONTENT TAB ===== -->
+        @if (tab() === 'content') {
+          <div class="content-tab" (input)="touch()" (change)="touch()">
+          <!-- Personal details -->
+          <div class="pf-card block">
+            <div class="block-head"><app-icon name="user" [size]="16" /> Personal details</div>
+            <div class="pd">
+              <div class="pd-photo">
+                <div class="avatar">
+                  @if (d.content.personalDetails.photo) {
+                    <img [src]="d.content.personalDetails.photo" alt="" />
+                  } @else {
+                    <app-icon name="camera" [size]="22" />
+                  }
+                </div>
+                <label class="pf-btn pf-btn-ghost tiny">
+                  Upload<input type="file" accept="image/*" hidden (change)="onPhoto($event)" />
+                </label>
+                @if (d.content.personalDetails.photo) {
+                  <button class="pf-btn pf-btn-ghost tiny" (click)="clearPhoto()">Remove</button>
+                }
+              </div>
+              <div class="pd-fields grid2">
+                <div><label class="pf-label">Full name</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.fullName" /></div>
+                <div><label class="pf-label">Job title</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.jobTitle" /></div>
+                <div><label class="pf-label">Email</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.email" /></div>
+                <div><label class="pf-label">Phone</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.phone" /></div>
+                <div class="full"><label class="pf-label">Location</label><input class="pf-input" [(ngModel)]="d.content.personalDetails.location" /></div>
+              </div>
+            </div>
+
+            <div class="sub-head">
+              <span>Links</span>
+              <button class="pf-btn pf-btn-ghost tiny" (click)="addLink()"><app-icon name="plus" [size]="13" /> Add link</button>
+            </div>
+            @for (l of d.content.personalDetails.links; track l.id) {
+              <div class="link-row">
+                <input class="pf-input small" [(ngModel)]="l.label" placeholder="LinkedIn" />
+                <input class="pf-input" [(ngModel)]="l.url" placeholder="https://…" />
+                <button class="icon-btn danger" (click)="removeLink(l.id)"><app-icon name="trash" [size]="15" /></button>
+              </div>
+            }
+
+            <div class="sub-head">
+              <span>Extra fields</span>
+              <button class="pf-btn pf-btn-ghost tiny" (click)="addField()"><app-icon name="plus" [size]="13" /> Add field</button>
+            </div>
+            @for (f of d.content.personalDetails.customFields; track f.id) {
+              <div class="link-row">
+                <input class="pf-input small" [(ngModel)]="f.label" placeholder="Nationality" />
+                <input class="pf-input" [(ngModel)]="f.value" placeholder="Dutch" />
+                <button class="icon-btn danger" (click)="removeField(f.id)"><app-icon name="trash" [size]="15" /></button>
+              </div>
+            }
+          </div>
+
+          <!-- Sections accordion -->
+          <div cdkDropList (cdkDropListDropped)="dropSection($event)" class="sections">
+            @for (s of d.content.sections; track s.id) {
+              <div class="pf-card section" cdkDrag>
+                <div class="sec-bar">
+                  <span class="drag" cdkDragHandle><app-icon name="grip" [size]="16" /></span>
+                  <span class="sec-ic"><app-icon [name]="sectionMeta[s.type].icon" [size]="16" /></span>
+                  <input class="sec-name" [(ngModel)]="s.name" />
+                  <button class="icon-btn" (click)="s.visible = !s.visible; touch()" [title]="s.visible ? 'Hide' : 'Show'">
+                    <app-icon [name]="s.visible ? 'eye' : 'eye-off'" [size]="16" />
+                  </button>
+                  <button class="icon-btn danger" (click)="removeSection(s)"><app-icon name="trash" [size]="15" /></button>
+                  <button class="icon-btn" (click)="toggleOpen(s.id)">
+                    <app-icon name="chevron-down" [size]="16" [style.transform]="isOpen(s.id) ? 'rotate(180deg)' : ''" />
+                  </button>
+                </div>
+
+                @if (isOpen(s.id)) {
+                  <div class="entries" cdkDropList (cdkDropListDropped)="dropEntry($event, s)">
+                    @for (e of s.entries; track e.id) {
+                      <div class="entry-edit" cdkDrag>
+                        <div class="entry-top">
+                          <span class="drag" cdkDragHandle><app-icon name="grip" [size]="15" /></span>
+                          <span class="entry-label">{{ e.title || 'Entry' }}</span>
+                          <button class="icon-btn" (click)="toggleEntry(e)"><app-icon [name]="e.visible ? 'eye' : 'eye-off'" [size]="15" /></button>
+                          <button class="icon-btn danger" (click)="removeEntry(s, e)"><app-icon name="trash" [size]="14" /></button>
+                        </div>
+
+                        @switch (s.type) {
+                          @case ('profile') {
+                            <textarea class="pf-input" rows="4" [(ngModel)]="e.description" placeholder="A short professional summary…"></textarea>
+                          }
+                          @case ('skills') {
+                            <div class="grid2">
+                              <div class="full"><label class="pf-label">Group name</label><input class="pf-input" [(ngModel)]="e.title" placeholder="Backend" /></div>
+                              <div class="full"><label class="pf-label">Skills (comma separated)</label><input class="pf-input" [value]="tagsOf(e)" (input)="setTags(e, $any($event.target).value)" placeholder="C#, .NET, SQL" /></div>
+                            </div>
+                            <div class="level"><span class="pf-label">Level</span>
+                              @for (n of levels; track n) {
+                                <i class="dot" [class.on]="n <= e.level" (click)="setLevel(e, n)"></i>
+                              }
+                            </div>
+                          }
+                          @case ('languages') {
+                            <div class="grid2">
+                              <div><label class="pf-label">Language</label><input class="pf-input" [(ngModel)]="e.title" placeholder="English" /></div>
+                              <div><label class="pf-label">Proficiency</label><input class="pf-input" [(ngModel)]="e.subtitle" placeholder="Fluent" /></div>
+                            </div>
+                            <div class="level"><span class="pf-label">Level</span>
+                              @for (n of levels; track n) {
+                                <i class="dot" [class.on]="n <= e.level" (click)="setLevel(e, n)"></i>
+                              }
+                            </div>
+                          }
+                          @case ('interests') {
+                            <label class="pf-label">Interests (comma separated)</label>
+                            <input class="pf-input" [value]="tagsOf(e)" (input)="setTags(e, $any($event.target).value)" placeholder="Reading, Hiking" />
+                          }
+                          @default {
+                            <div class="grid2">
+                              <div><label class="pf-label">Title</label><input class="pf-input" [(ngModel)]="e.title" /></div>
+                              <div><label class="pf-label">Subtitle</label><input class="pf-input" [(ngModel)]="e.subtitle" placeholder="Company / Institution" /></div>
+                              <div><label class="pf-label">Start</label><input class="pf-input" type="month" [(ngModel)]="e.startDate" /></div>
+                              <div>
+                                <label class="pf-label">End</label>
+                                @if (e.current) {
+                                  <input class="pf-input" value="Present" disabled />
+                                } @else {
+                                  <input class="pf-input" type="month" [(ngModel)]="e.endDate" />
+                                }
+                              </div>
+                              <div class="full inline">
+                                <label class="check"><input type="checkbox" [(ngModel)]="e.current" (change)="touch()" /> Currently here</label>
+                              </div>
+                              <div class="full"><label class="pf-label">Location</label><input class="pf-input" [(ngModel)]="e.location" /></div>
+                              <div class="full"><label class="pf-label">Description (use “- ” for bullets, **bold**)</label><textarea class="pf-input" rows="4" [(ngModel)]="e.description"></textarea></div>
+                              <div class="full"><label class="pf-label">Link</label><input class="pf-input" [(ngModel)]="e.url" placeholder="https://…" /></div>
+                            </div>
+                          }
+                        }
+                      </div>
+                    }
+                    <button class="add-entry" (click)="addEntry(s)"><app-icon name="plus" [size]="14" /> Add entry</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <button class="pf-btn pf-btn-primary add-content" (click)="addOpen.set(true)">
+            <app-icon name="plus" [size]="17" /> Add Content
+          </button>
+          </div>
+        }
+
+        <!-- ===== CUSTOMIZE TAB ===== -->
+        @if (tab() === 'customize') {
+          <div class="pf-card block">
+            <div class="block-title">Template</div>
+            <p class="muted">Switch the whole look without touching your content.</p>
+            <div class="tpl-grid">
+              @for (t of templates; track t.id) {
+                <button class="tpl" [class.on]="d.customization.template === t.id" (click)="applyTemplate(t.id)">
+                  <span class="swatch" [style.background]="t.headerColor"></span>{{ t.name }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="pf-card block">
+            <div class="block-title">Colour</div>
+            <p class="muted">Sets the accent on your name, headings and links.</p>
+            <div class="swatches">
+              @for (c of swatches; track c) {
+                <button class="sw" [style.background]="c" [class.sel]="d.customization.accentColor === c" (click)="set('accentColor', c)">
+                  @if (d.customization.accentColor === c) { <app-icon name="check" [size]="13" /> }
+                </button>
+              }
+              <label class="sw custom" [style.background]="d.customization.accentColor">
+                <input type="color" [value]="d.customization.accentColor" (input)="set('accentColor', $any($event.target).value)" hidden />
+                <app-icon name="edit" [size]="13" />
+              </label>
+            </div>
+            <div class="accent-toggles">
+              @for (a of accentKeys; track a[0]) {
+                <label class="check"><input type="checkbox" [checked]="d.customization.accent[a[0]]" (change)="toggleAccent(a[0])" /> {{ a[1] }}</label>
+              }
+            </div>
+          </div>
+
+          <div class="pf-card block">
+            <div class="block-title">Typography</div>
+            <label class="pf-label">Font</label>
+            <select class="pf-input" [ngModel]="d.customization.fontFamily" (ngModelChange)="set('fontFamily', $event)">
+              @for (f of fonts; track f.value) { <option [value]="f.value">{{ f.label }}</option> }
+            </select>
+            <div class="slider">
+              <label class="pf-label">Font size <b>{{ d.customization.fontScale.toFixed(2) }}×</b></label>
+              <input type="range" min="0.85" max="1.2" step="0.01" [ngModel]="d.customization.fontScale" (ngModelChange)="set('fontScale', +$event)" />
+            </div>
+            <div class="slider">
+              <label class="pf-label">Line spacing <b>{{ d.customization.lineSpacing.toFixed(2) }}</b></label>
+              <input type="range" min="1.1" max="1.8" step="0.05" [ngModel]="d.customization.lineSpacing" (ngModelChange)="set('lineSpacing', +$event)" />
+            </div>
+            <div class="slider">
+              <label class="pf-label">Section spacing <b>{{ d.customization.sectionSpacing }}px</b></label>
+              <input type="range" min="8" max="32" step="1" [ngModel]="d.customization.sectionSpacing" (ngModelChange)="set('sectionSpacing', +$event)" />
+            </div>
+          </div>
+
+          <div class="pf-card block">
+            <div class="block-title">Layout</div>
+            <label class="pf-label">Header position</label>
+            <div class="seg">
+              @for (h of headerPositions; track h) {
+                <button [class.on]="d.customization.headerPosition === h" (click)="set('headerPosition', h)">{{ h }}</button>
+              }
+            </div>
+            <label class="pf-label" style="margin-top:14px">Header alignment</label>
+            <div class="seg">
+              @for (a of headerAligns; track a) {
+                <button [class.on]="d.customization.headerAlignment === a" (click)="set('headerAlignment', a)">{{ a }}</button>
+              }
+            </div>
+            <label class="pf-label" style="margin-top:14px">Body columns</label>
+            <div class="seg">
+              <button [class.on]="d.customization.columns === 1" (click)="set('columns', 1)">One</button>
+              <button [class.on]="d.customization.columns === 2" (click)="set('columns', 2)">Two</button>
+            </div>
+            <label class="pf-label" style="margin-top:14px">Page format</label>
+            <div class="seg">
+              <button [class.on]="d.customization.pageFormat === 'A4'" (click)="set('pageFormat', 'A4')">A4</button>
+              <button [class.on]="d.customization.pageFormat === 'Letter'" (click)="set('pageFormat', 'Letter')">US Letter</button>
+            </div>
+          </div>
+
+          <div class="pf-card block">
+            <div class="block-title">Photo</div>
+            <label class="check"><input type="checkbox" [checked]="d.customization.photo.show" (change)="d.customization.photo.show = !d.customization.photo.show; touch()" /> Show photo</label>
+            <label class="check"><input type="checkbox" [checked]="d.customization.photo.grayscale" (change)="d.customization.photo.grayscale = !d.customization.photo.grayscale; touch()" /> Grayscale</label>
+            <label class="pf-label" style="margin-top:12px">Shape</label>
+            <div class="seg">
+              @for (sh of photoShapes; track sh) {
+                <button [class.on]="d.customization.photo.shape === sh" (click)="d.customization.photo.shape = sh; touch()">{{ sh }}</button>
+              }
+            </div>
+            <label class="pf-label" style="margin-top:12px">Size</label>
+            <div class="seg">
+              @for (sz of photoSizes; track sz) {
+                <button [class.on]="d.customization.photo.size === sz" (click)="d.customization.photo.size = sz; touch()">{{ sz }}</button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ===== OVERVIEW TAB ===== -->
+        @if (tab() === 'overview') {
+          <div class="pf-card block">
+            <div class="block-title">Résumé health</div>
+            <p class="muted">A quick read on how complete this résumé is.</p>
+            @for (st of health(); track st.label) {
+              <div class="health">
+                <div class="health-row"><span>{{ st.label }}</span><span class="mono">{{ st.val }}</span></div>
+                <div class="bar"><div class="fill" [style.width.%]="st.pct"></div></div>
+              </div>
+            }
+          </div>
+          <div class="pf-card block">
+            <div class="block-title">Document</div>
+            <label class="pf-label">Title</label>
+            <input class="pf-input" [(ngModel)]="d.title" (input)="touch()" />
+            <label class="pf-label" style="margin-top:14px">Tag</label>
+            <input class="pf-input" [ngModel]="d.tag" (ngModelChange)="d.tag = $event; touch()" placeholder="e.g. .NET roles" />
+          </div>
+        }
+      </div>
+
+      <!-- ============ RIGHT: live preview ============ -->
+      <div class="preview">
+        <app-resume-paper [content]="d.content" [customization]="d.customization" [rev]="rev()" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Add content modal -->
+  @if (addOpen()) {
+    <div class="pf-backdrop" (click)="addOpen.set(false)">
+      <div class="pf-modal add-modal" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div>
+            <h2>Add content</h2>
+            <p>Pick a section to add to your résumé.</p>
+          </div>
+          <button class="icon-btn" (click)="addOpen.set(false)"><app-icon name="close" [size]="17" /></button>
+        </div>
+        <div class="add-grid">
+          @for (it of addItems; track it.type) {
+            <button class="add-card" (click)="addSection(it.type)">
+              <span class="ai"><app-icon [name]="it.icon" [size]="18" /></span>
+              <div class="an">{{ it.label }}</div>
+              <div class="ad">{{ it.desc }}</div>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+} @else {
+  <div class="loading">Loading résumé…</div>
+}

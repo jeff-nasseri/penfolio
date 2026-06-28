@@ -1,0 +1,152 @@
+<div class="frame" #frame>
+  <div
+    class="resume-paper pf-print"
+    #paper
+    [style.width.px]="pageW"
+    [style.fontFamily]="fontStack"
+    [style.lineHeight]="c.lineSpacing"
+    [style.fontSize.px]="13 * c.fontScale"
+  >
+    @if (isSide) {
+      <div class="side-layout" [class.right]="c.headerPosition === 'right'">
+        <aside class="side" [style.background]="accentTint">
+          <ng-container *ngTemplateOutlet="headerBlock; context: { side: true }" />
+        </aside>
+        <main class="main">
+          <ng-container *ngTemplateOutlet="bodyTpl" />
+        </main>
+      </div>
+    } @else {
+      <ng-container *ngTemplateOutlet="headerBlock; context: { side: false }" />
+      <div class="body" [class.two]="c.columns === 2">
+        <ng-container *ngTemplateOutlet="bodyTpl" />
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Header block -->
+<ng-template #headerBlock let-side="side">
+  <header class="header" [class.center]="c.headerAlignment === 'center' && !side" [class.side]="side">
+    @if (c.photo.show) {
+      <div
+        class="photo"
+        [class.circle]="c.photo.shape === 'circle'"
+        [class.rounded]="c.photo.shape === 'rounded'"
+        [style.width.px]="photoPx"
+        [style.height.px]="photoPx"
+        [style.filter]="c.photo.grayscale ? 'grayscale(1)' : 'none'"
+      >
+        @if (content.personalDetails.photo) {
+          <img [src]="content.personalDetails.photo" alt="" />
+        } @else {
+          <span>{{ initials }}</span>
+        }
+      </div>
+    }
+    <div class="ident">
+      <div class="name" [style.color]="c.accent.name ? c.accentColor : '#111827'">
+        {{ content.personalDetails.fullName || 'Your Name' }}
+      </div>
+      @if (content.personalDetails.jobTitle) {
+        <div class="title" [style.color]="c.accent.jobTitle ? c.accentColor : '#4b5563'">
+          {{ content.personalDetails.jobTitle }}
+        </div>
+      }
+    </div>
+    <div class="contacts" [class.stack]="side">
+      @for (ct of vmContacts; track ct.label) {
+        <span class="contact">
+          <span class="ci" [style.color]="c.accent.headerIcons ? c.accentColor : '#6b7280'">●</span>
+          @if (ct.url) {
+            <a [href]="ct.url" target="_blank" [style.color]="c.accent.links ? c.accentColor : '#374151'">{{ ct.text }}</a>
+          } @else {
+            <span>{{ ct.text }}</span>
+          }
+        </span>
+      }
+    </div>
+  </header>
+</ng-template>
+
+<!-- Body sections -->
+<ng-template #bodyTpl>
+  @for (vs of vmSections; track vs.s.id) {
+    <section class="sec" [style.marginBottom.px]="c.sectionSpacing">
+      <div
+        class="sec-head"
+        [class.line]="c.accent.headingLine"
+        [style.color]="c.accent.headings ? c.accentColor : '#111827'"
+        [style.borderColor]="c.accent.headingLine ? c.accentColor : 'transparent'"
+      >
+        {{ vs.s.name }}
+      </div>
+      @for (ve of vs.entries; track ve.e.id) {
+        <div class="entry">
+          @switch (vs.s.type) {
+            @case ('profile') {
+              <div class="desc" [innerHTML]="ve.desc"></div>
+            }
+            @case ('skills') {
+              <div class="skill-row">
+                @if (ve.e.title) {
+                  <span class="skill-name">{{ ve.e.title }}</span>
+                }
+                <span class="skill-items">{{ ve.e.tags.length ? ve.e.tags.join(' · ') : ve.e.subtitle }}</span>
+                @if (ve.e.level > 0) {
+                  <span class="dots">
+                    @for (d of dots; track d) {
+                      <i [style.background]="d <= ve.e.level ? c.accentColor : '#d1d5db'"></i>
+                    }
+                  </span>
+                }
+              </div>
+            }
+            @case ('languages') {
+              <div class="skill-row">
+                <span class="skill-name">{{ ve.e.title }}</span>
+                <span class="skill-items">{{ ve.e.subtitle }}</span>
+                @if (ve.e.level > 0) {
+                  <span class="dots">
+                    @for (d of dots; track d) {
+                      <i [style.background]="d <= ve.e.level ? c.accentColor : '#d1d5db'"></i>
+                    }
+                  </span>
+                }
+              </div>
+            }
+            @case ('interests') {
+              <div class="chips">
+                @for (t of ve.chips; track t) {
+                  <span class="chip" [style.borderColor]="c.accentColor">{{ t }}</span>
+                }
+              </div>
+            }
+            @default {
+              <div class="entry-head">
+                <div class="eh-left">
+                  <span class="e-title">{{ ve.e.title }}</span>
+                  @if (ve.e.subtitle) {
+                    <span class="e-sub" [style.color]="c.accentColor">{{ ve.e.subtitle }}</span>
+                  }
+                </div>
+                <div class="eh-right" [style.color]="c.accent.dates ? c.accentColor : '#6b7280'">
+                  {{ ve.date }}
+                  @if (ve.e.location) {
+                    <span class="e-loc">{{ ve.e.location }}</span>
+                  }
+                </div>
+              </div>
+              @if (ve.e.description) {
+                <div class="desc" [innerHTML]="ve.desc"></div>
+              }
+              @if (ve.e.url) {
+                <a class="e-url" [href]="ve.e.url" target="_blank" [style.color]="c.accentColor">{{ ve.e.url }}</a>
+              }
+            }
+          }
+        </div>
+      }
+    </section>
+  }
+</ng-template>
