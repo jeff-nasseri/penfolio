@@ -7,36 +7,47 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 26px;
+  margin-bottom: 22px;
 }
 
-.cols {
+.subsection {
+  margin-bottom: 26px;
+}
+.sub-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+
+  &.danger {
+    color: var(--danger);
+  }
+}
+
+.cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: start;
-}
-.col {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+
+  &.two {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .block {
   padding: 20px 22px;
 }
 .block-head {
-  display: flex;
-  align-items: center;
-  gap: 9px;
   font-weight: 700;
   font-size: 14px;
   color: var(--text);
   margin-bottom: 14px;
-
-  &.danger {
-    color: var(--danger);
-  }
 }
 .muted {
   font-size: 12.5px;
@@ -64,6 +75,7 @@
   color: var(--accent-text);
   overflow: hidden;
   flex-shrink: 0;
+
   img {
     width: 100%;
     height: 100%;
@@ -94,11 +106,55 @@
   gap: 10px;
 }
 
-textarea.pf-input {
-  resize: vertical;
-  line-height: 1.5;
-}
-
 .danger-zone {
   border-color: var(--danger-border);
+}
+
+/* About card */
+.about-card {
+  .about-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .version {
+    font-size: 12.5px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .about-desc {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin: 0 0 16px;
+  }
+  .about-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+
+    div {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .k {
+      width: 96px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .v {
+      color: var(--text);
+    }
+    a.v {
+      color: var(--accent);
+      text-decoration: none;
+      word-break: break-all;
+    }
+  }
 }

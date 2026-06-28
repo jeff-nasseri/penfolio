@@ -1,15 +1,17 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import type { AboutInfo } from '@penfolio/shared';
 import { AuthService } from '../../core/auth.service';
 import { ApiService } from '../../core/api.service';
 import { Icon } from '../../shared/icon';
+import { Logo } from '../../shared/logo';
 import { ToastService } from '../../shared/toast';
 import { ConfirmService } from '../../shared/confirm';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [FormsModule, Icon],
+  imports: [FormsModule, Icon, Logo],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })
@@ -20,10 +22,10 @@ export class Settings implements OnInit {
   private readonly confirm = inject(ConfirmService);
 
   readonly user = this.auth.user;
+  readonly about = signal<AboutInfo | null>(null);
 
   // profile
   username = '';
-  about = '';
   photo: string | null = null;
 
   // password
@@ -38,10 +40,10 @@ export class Settings implements OnInit {
     this.auth.getProfile().subscribe({
       next: (u) => {
         this.username = u.username;
-        this.about = u.about;
         this.photo = u.profilePicture;
       },
     });
+    this.api.getAbout().subscribe({ next: (a) => this.about.set(a) });
   }
 
   // ---- Profile ----
@@ -56,7 +58,7 @@ export class Settings implements OnInit {
     this.photo = null;
   }
   saveProfile(): void {
-    this.auth.updateProfile({ username: this.username, about: this.about, profilePicture: this.photo }).subscribe({
+    this.auth.updateProfile({ username: this.username, profilePicture: this.photo }).subscribe({
       next: () => this.toast.success('Profile saved'),
       error: () => this.toast.error('Could not save profile'),
     });

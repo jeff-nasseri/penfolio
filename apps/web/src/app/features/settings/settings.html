@@ -7,11 +7,12 @@
     <button class="pf-btn pf-btn-ghost" (click)="logout()"><app-icon name="logout" [size]="15" /> Sign out</button>
   </header>
 
-  <div class="cols">
-    <div class="col">
-      <!-- Profile -->
+  <!-- ===== Account ===== -->
+  <div class="subsection">
+    <div class="sub-head"><app-icon name="user" [size]="15" /> Account</div>
+    <div class="cards">
       <div class="pf-card block">
-        <div class="block-head"><app-icon name="user" [size]="16" /> Profile</div>
+        <div class="block-head">Profile</div>
         <div class="profile">
           <div class="avatar">
             @if (photo) { <img [src]="photo" alt="" /> } @else { {{ initials() }} }
@@ -25,18 +26,15 @@
         <input class="pf-input" [(ngModel)]="username" />
         <button class="pf-btn pf-btn-primary save" (click)="saveProfile()">Save profile</button>
       </div>
+    </div>
+  </div>
 
-      <!-- About -->
+  <!-- ===== Security ===== -->
+  <div class="subsection">
+    <div class="sub-head"><app-icon name="lock" [size]="15" /> Security</div>
+    <div class="cards">
       <div class="pf-card block">
-        <div class="block-head"><app-icon name="profile" [size]="16" /> About</div>
-        <p class="muted">A short note about you — kept private to your account.</p>
-        <textarea class="pf-input" rows="5" [(ngModel)]="about" placeholder="Tell yourself who this workspace is for…"></textarea>
-        <button class="pf-btn pf-btn-primary save" (click)="saveProfile()">Save about</button>
-      </div>
-
-      <!-- Password -->
-      <div class="pf-card block">
-        <div class="block-head"><app-icon name="lock" [size]="16" /> Change password</div>
+        <div class="block-head">Change password</div>
         <label class="pf-label">Current password</label>
         <input class="pf-input" type="password" [(ngModel)]="currentPassword" autocomplete="current-password" />
         <label class="pf-label" style="margin-top:14px">New password</label>
@@ -48,20 +46,14 @@
         </button>
       </div>
     </div>
+  </div>
 
-    <div class="col">
-      <!-- API -->
+  <!-- ===== Data & API ===== -->
+  <div class="subsection">
+    <div class="sub-head"><app-icon name="database" [size]="15" /> Data &amp; API</div>
+    <div class="cards two">
       <div class="pf-card block">
-        <div class="block-head"><app-icon name="code" [size]="16" /> API</div>
-        <p class="muted">PenFolio is fully driven by a REST API — handy for automation and a future MCP server.</p>
-        <button class="pf-btn pf-btn-solid wide" (click)="openSwagger()">
-          <app-icon name="arrow-right" [size]="15" /> Open Swagger API
-        </button>
-      </div>
-
-      <!-- Data -->
-      <div class="pf-card block">
-        <div class="block-head"><app-icon name="database" [size]="16" /> Data</div>
+        <div class="block-head">Export &amp; import</div>
         <p class="muted">Export your whole workspace as JSON, or replace it from a previous export.</p>
         <div class="data-row">
           <button class="pf-btn pf-btn-ghost wide" (click)="exportData()"><app-icon name="download" [size]="15" /> Export JSON</button>
@@ -71,9 +63,45 @@
         </div>
       </div>
 
-      <!-- Danger zone -->
+      <div class="pf-card block">
+        <div class="block-head">API</div>
+        <p class="muted">PenFolio is fully driven by a REST API — handy for automation and a future MCP server.</p>
+        <button class="pf-btn pf-btn-solid wide" (click)="openSwagger()">
+          <app-icon name="arrow-right" [size]="15" /> Open Swagger API
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== About (read-only) ===== -->
+  <div class="subsection">
+    <div class="sub-head"><app-icon name="sparkle" [size]="15" /> About</div>
+    <div class="cards">
+      <div class="pf-card block about-card">
+        @if (about(); as a) {
+          <div class="about-top">
+            <app-logo [size]="40" />
+            <span class="version mono">v{{ a.version }}</span>
+          </div>
+          <p class="about-desc">{{ a.description }}</p>
+          <div class="about-meta">
+            <div><span class="k">Version</span><span class="v mono">{{ a.version }}</span></div>
+            <div><span class="k">License</span><span class="v">{{ a.license }}</span></div>
+            <div><span class="k">Repository</span><a class="v" [href]="a.repository" target="_blank">{{ a.repository }}</a></div>
+          </div>
+        } @else {
+          <p class="muted">Loading…</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Danger zone ===== -->
+  <div class="subsection">
+    <div class="sub-head danger"><app-icon name="warning" [size]="15" /> Danger zone</div>
+    <div class="cards">
       <div class="pf-card block danger-zone">
-        <div class="block-head danger"><app-icon name="warning" [size]="16" /> Danger zone</div>
+        <div class="block-head">Purge all data</div>
         <p class="muted">Permanently delete every résumé, cover letter and all job-tracker data. Your account is kept.</p>
         <button class="pf-btn pf-btn-danger wide" (click)="purge()"><app-icon name="trash" [size]="15" /> Purge all data</button>
       </div>
