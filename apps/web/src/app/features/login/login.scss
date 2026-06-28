@@ -1,0 +1,73 @@
+.screen {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(120% 130% at 18% 0%, var(--panel) 0%, var(--bg) 60%);
+}
+
+.card {
+  width: min(400px, 100%);
+  padding: 38px 36px 30px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sub {
+  margin: 8px 0 26px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.full {
+  width: 100%;
+  justify-content: center;
+  margin-top: 22px;
+  padding: 12px;
+  font-size: 14.5px;
+}
+
+.err {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  color: var(--danger);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.hint {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+
+  b {
+    color: var(--text-2);
+    font-family: 'JetBrains Mono';
+  }
+}

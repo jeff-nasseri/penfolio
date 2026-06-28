@@ -1,0 +1,33 @@
+<div class="screen">
+  <div class="card pf-modal">
+    <div class="logo"><app-logo [size]="52" /></div>
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to your self-hosted PenFolio workspace.</p>
+
+    <form (ngSubmit)="submit()">
+      <label class="pf-label">Username</label>
+      <input class="pf-input" name="username" [(ngModel)]="username" autocomplete="username" />
+
+      <label class="pf-label" style="margin-top: 16px">Password</label>
+      <input
+        class="pf-input"
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        autocomplete="current-password"
+        placeholder="Enter your password"
+      />
+
+      @if (error()) {
+        <div class="err"><app-icon name="warning" [size]="15" /> {{ error() }}</div>
+      }
+
+      <button class="pf-btn pf-btn-primary full" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Signing in…' : 'Sign in' }}
+        <app-icon name="arrow-right" [size]="16" />
+      </button>
+    </form>
+
+    <div class="hint">Default credentials: <b>admin</b> / <b>admin123</b></div>
+  </div>
+</div>

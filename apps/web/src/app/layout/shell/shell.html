@@ -1,0 +1,68 @@
+<div class="layout">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/resumes">
+      <app-logo [size]="38" />
+    </a>
+
+    <div class="nav-label">Workspace</div>
+    <nav class="nav">
+      <a routerLink="/tracker" routerLinkActive="active" class="nav-item">
+        <app-icon name="tracker" />
+        <span class="flex">Job Tracker</span>
+        @if (appCount() > 0) {
+          <span class="badge mono">{{ appCount() }}</span>
+        }
+      </a>
+      <a routerLink="/analytics" routerLinkActive="active" class="nav-item">
+        <app-icon name="analytics" />
+        <span class="flex">Analytics</span>
+      </a>
+      <a routerLink="/resumes" routerLinkActive="active" class="nav-item">
+        <app-icon name="resume" />
+        <span class="flex">Resumes</span>
+      </a>
+      <a routerLink="/cover-letters" routerLinkActive="active" class="nav-item">
+        <app-icon name="cover" />
+        <span class="flex">Cover Letters</span>
+      </a>
+    </nav>
+
+    <div class="spacer"></div>
+
+    <div class="selfhosted">
+      <div class="title"><app-icon name="sparkle" [size]="14" /> Self-hosted</div>
+      <div class="desc">Open-source &amp; yours. No limits, no paywalls.</div>
+    </div>
+
+    <div class="theme-toggle">
+      <button [class.on]="theme() === 'light'" (click)="setTheme('light')">
+        <app-icon name="sun" [size]="15" /> Light
+      </button>
+      <button [class.on]="theme() === 'dark'" (click)="setTheme('dark')">
+        <app-icon name="moon" [size]="15" /> Dark
+      </button>
+    </div>
+
+    <a routerLink="/settings" routerLinkActive="active" class="account">
+      <span class="avatar">
+        @if (user()?.profilePicture) {
+          <img [src]="user()!.profilePicture" alt="" />
+        } @else {
+          {{ initials() }}
+        }
+      </span>
+      <span class="meta">
+        <span class="name">{{ user()?.username || 'Account' }}</span>
+        <span class="sub">My account</span>
+      </span>
+      <app-icon name="sort" [size]="15" />
+    </a>
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>
+
+<app-toasts />
+<app-confirm />
