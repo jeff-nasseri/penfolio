@@ -91,6 +91,14 @@ export function migrate(): void {
   seedDefaultColumns();
 }
 
+/**
+ * Re-create the default job-tracker columns if none exist. Called after a purge
+ * so the tracker is reset to a usable default pipeline rather than left empty.
+ */
+export function ensureDefaultColumns(): void {
+  seedDefaultColumns();
+}
+
 function seedDefaultUser(): void {
   const db = getDb();
   if (db.prepare('SELECT id FROM app_user WHERE id = 1').get()) return;

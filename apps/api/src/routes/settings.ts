@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ABOUT, EXPORT_VERSION, type DatabaseExport, type ImportResult } from '@penfolio/shared';
 import { env } from '../env';
 import { getDb } from '../db/connection';
-import { DATA_TABLES, EXPORT_TABLES, IMPORT_TABLES } from '../db/migrate';
+import { DATA_TABLES, EXPORT_TABLES, IMPORT_TABLES, ensureDefaultColumns } from '../db/migrate';
 import { requireAuth } from '../auth/middleware';
 import { nowIso } from '../util/time';
 import { asyncHandler, badRequest } from '../util/http';
@@ -100,6 +100,8 @@ export function settingsRouter(): Router {
       } finally {
         db.pragma('foreign_keys = ON');
       }
+      // Reset the tracker to a usable default pipeline instead of leaving it empty.
+      ensureDefaultColumns();
       res.json({ purged: true });
     }),
   );
