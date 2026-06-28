@@ -1,0 +1,142 @@
+<section class="page">
+  <header class="head">
+    <div>
+      <h1 class="pf-h1">Analytics</h1>
+      <p class="pf-sub">How your search is really going — measured across the whole pipeline.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state">Loading…</div>
+  } @else if (data(); as d) {
+    <!-- Stat cards -->
+    <div class="cards">
+      @for (c of cards(); track c.label) {
+        <div class="stat">
+          <div class="stat-top">
+            <span class="stat-label">{{ c.label }}</span>
+            <span class="stat-ic" [style.background]="c.color + '22'"><i [style.background]="c.color"></i></span>
+          </div>
+          <div class="stat-val mono">{{ c.value }}</div>
+          <div class="stat-sub">{{ c.sub }}</div>
+        </div>
+      }
+    </div>
+
+    <!-- Documents summary -->
+    <div class="docs">
+      <a class="doc" routerLink="/resumes">
+        <span class="doc-ic"><app-icon name="resume" [size]="18" /></span>
+        <div><div class="doc-n mono">{{ d.totals.resumes }}</div><div class="doc-l">Résumés</div></div>
+      </a>
+      <a class="doc" routerLink="/cover-letters">
+        <span class="doc-ic"><app-icon name="cover" [size]="18" /></span>
+        <div><div class="doc-n mono">{{ d.totals.coverLetters }}</div><div class="doc-l">Cover letters</div></div>
+      </a>
+      <a class="doc" routerLink="/tracker">
+        <span class="doc-ic"><app-icon name="tracker" [size]="18" /></span>
+        <div><div class="doc-n mono">{{ d.totals.columns }}</div><div class="doc-l">Tracker columns</div></div>
+      </a>
+    </div>
+
+    @if (!hasApps()) {
+      <div class="pf-card no-data">
+        <app-icon name="analytics" [size]="30" />
+        <p>No applications tracked yet. Add some on the <a routerLink="/tracker">Job Tracker</a> to see your funnel, pipeline and sources here.</p>
+      </div>
+    } @else {
+      <div class="two-col">
+        <!-- Funnel -->
+        <div class="pf-card panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Conversion funnel</div>
+              <div class="panel-sub">Where applications drop off, stage by stage</div>
+            </div>
+            <span class="pf-chip">{{ d.rates.overallRate }}% end-to-end</span>
+          </div>
+          <div class="funnel">
+            @for (f of d.funnel; track f.stage) {
+              <div class="fr">
+                <div class="fr-head">
+                  <span class="fr-label">{{ f.label }}</span>
+                  <span class="fr-vals">
+                    @if (f.conversion !== null) { <span class="conv mono">↓ {{ f.conversion }}%</span> }
+                    <span class="mono">{{ f.value }}</span>
+                  </span>
+                </div>
+                <div class="fr-bar"><div class="fr-fill" [style.width.%]="f.pct"><span class="mono">{{ f.pct }}%</span></div></div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Pipeline donut -->
+        <div class="pf-card panel">
+          <div class="panel-title">Pipeline breakdown</div>
+          <div class="panel-sub">Applications by current status</div>
+          <div class="donut-row">
+            <div class="donut">
+              <svg viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" fill="none" stroke="var(--track)" stroke-width="13" />
+                @for (s of donut(); track $index) {
+                  <circle cx="60" cy="60" r="54" fill="none" [attr.stroke]="s.color" stroke-width="13" stroke-linecap="round"
+                    [attr.stroke-dasharray]="s.dash" [attr.stroke-dashoffset]="s.offset" transform="rotate(-90 60 60)" />
+                }
+              </svg>
+              <div class="donut-center"><div class="mono">{{ d.totals.applications }}</div><span>total</span></div>
+            </div>
+            <div class="legend">
+              @for (b of d.byColumn; track b.columnId) {
+                <div class="leg">
+                  <span class="dot" [style.background]="b.color"></span>
+                  <span class="leg-name">{{ b.name }}</span>
+                  <span class="mono">{{ b.count }}</span>
+                  <span class="mono pct">{{ b.pct }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Over time -->
+        <div class="pf-card panel">
+          <div class="panel-title">Applications over time</div>
+          <div class="panel-sub">Volume per month</div>
+          <div class="vol">
+            @for (v of d.overTime; track v.month) {
+              <div class="vbar">
+                <div class="vstack">
+                  <div class="vrej" [style.height.px]="volH(v.total, v.rejected, false)"></div>
+                  <div class="vact" [style.height.px]="volH(v.total, v.rejected, true)"></div>
+                </div>
+                <div class="vlabel">{{ v.month }}</div>
+                <div class="vcount mono">{{ v.total }}</div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Sources -->
+        <div class="pf-card panel">
+          <div class="panel-title">Where they came from</div>
+          <div class="panel-sub">Source of each application</div>
+          @if (d.sources.length) {
+            <div class="sources">
+              @for (s of d.sources; track s.source) {
+                <div class="src">
+                  <div class="src-head"><span>{{ s.source }}</span><span class="mono">{{ s.count }}</span></div>
+                  <div class="src-bar"><div class="src-fill" [style.width.%]="srcW(s.count)"></div></div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="muted">Add a source to your applications to see this chart.</p>
+          }
+        </div>
+      </div>
+    }
+  }
+</section>
