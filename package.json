@@ -1,0 +1,24 @@
+{
+  "name": "penfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PenFolio — a self-hosted CV / cover-letter builder with a built-in job tracker. A FlowCV-inspired, open-source platform.",
+  "author": "Jeff Nasseri <sir.jeff.nasseri@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "install:all": "npm install --prefix apps/api && npm install --prefix apps/web",
+    "dev": "concurrently -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm --prefix apps/api run dev",
+    "dev:web": "npm --prefix apps/web start",
+    "build": "npm --prefix apps/api run build && npm --prefix apps/web run build",
+    "typecheck": "npm --prefix apps/api run typecheck",
+    "start": "npm --prefix apps/api run start",
+    "docker:build": "docker build -t penfolio:latest .",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

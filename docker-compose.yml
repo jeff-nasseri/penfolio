@@ -1,0 +1,30 @@
+services:
+  penfolio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/jeff-nasseri/penfolio:latest
+    container_name: penfolio
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_PATH: /app/data/penfolio.sqlite
+      WEB_DIR: /app/public
+      JWT_SECRET: ${JWT_SECRET:-please-change-this-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      DEFAULT_USERNAME: ${DEFAULT_USERNAME:-admin}
+      DEFAULT_PASSWORD: ${DEFAULT_PASSWORD:-admin123}
+    volumes:
+      - penfolio-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  penfolio-data:

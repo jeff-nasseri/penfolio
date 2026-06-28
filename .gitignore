@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+build/
+.angular/
+apps/web/.angular/
+out-tsc/
+
+# Env & secrets
+.env
+*.local
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+data/
+apps/api/data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local design reference assets (bulky; not app source)
+design/
+
+# Test artifacts
+coverage/

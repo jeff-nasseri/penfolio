@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/.angular
+**/out-tsc
+design
+data
+*.sqlite
+*.log
+.git
+.github
+.env
